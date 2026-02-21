@@ -12,13 +12,12 @@ export function initEventListeners() {
   const refreshButton = document.getElementById('refresh-button');
   const checkUpdatesButton = document.getElementById('check-updates-button');
   const filterUpdatesCheckbox = document.getElementById("filter-updates-checkbox");
-  const filterRunningCheckbox = document.getElementById("filter-running-checkbox");
   const searchInput = document.getElementById("search-input");
   const clearSearchButton = document.getElementById("clear-search-button");
   const columnMenuButton = document.getElementById('column-menu-button');
   const columnMenu = document.getElementById('column-menu');
   const resetColumnsButton = document.getElementById('reset-columns-button');
-  const containerRowsBody = document.getElementById("container-rows");
+  const containerRowsBody = document.getElementById("panels-container");
 
   refreshButton.addEventListener("click", () => {
     state.pruneInfoCache = null;
@@ -55,11 +54,6 @@ export function initEventListeners() {
 
   filterUpdatesCheckbox.addEventListener("change", updateDisplay);
 
-  filterRunningCheckbox.addEventListener("change", () => {
-    localStorage.setItem('filterRunningChecked', JSON.stringify(filterRunningCheckbox.checked));
-    updateDisplay();
-  });
-
   searchInput.addEventListener("input", function () {
     toggleClearButton();
     updateDisplay();
@@ -90,11 +84,25 @@ export function initEventListeners() {
 
   document.querySelector('.logo-title').addEventListener('click', () => {
     filterUpdatesCheckbox.checked = false;
+    state.statusFilter = null;
     clearSearch();
     updateDisplay();
   });
 
   containerRowsBody.addEventListener('click', function (e) {
+    // Stack group header collapse toggle
+    const groupHeader = e.target.closest('.stack-group-header');
+    if (groupHeader) {
+      const stackName = groupHeader.dataset.stack;
+      try {
+        const saved = JSON.parse(localStorage.getItem('collapsedStacks') || '{}');
+        saved[stackName] = !saved[stackName];
+        localStorage.setItem('collapsedStacks', JSON.stringify(saved));
+      } catch { /* ignore */ }
+      updateDisplay();
+      return;
+    }
+
     if (e.target.classList.contains('update-available-indicator') || e.target.closest('.update-available-indicator')) {
       e.preventDefault();
       e.stopPropagation();

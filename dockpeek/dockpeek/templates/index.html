@@ -25,32 +25,35 @@
     }
   </style>
   {% endif %}
-  <div class="container mx-auto bg-white rounded-lg shadow-xl">
-    <div class="container-top pt-8 pr-8 pl-8 pb-0">
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center space-x-4">
-          <h1 class="logo-title text-3xl font-bold">dockpeek</h1>
+  <div class="page-wrapper mx-auto">
+    <div class="container-top pt-5 pr-6 pl-6 pb-0">
+
+      <!-- ── Row 1: Logo · Stats (flex) · Controls ── -->
+      <div class="header-row-1 flex items-center gap-3 mb-3">
+
+        <!-- Left: logo + swarm badge -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <h1 class="logo-title text-2xl font-bold">dockpeek</h1>
           <div id="swarm-indicator"
             class="hidden flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium swarm-indicator">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path
                 d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5Z" />
             </svg>
             <span>Swarm Mode</span>
           </div>
         </div>
-        <div class="flex space-x-4 items-center text-sm controls-container">
-          <div class="status-filter flex items-center space-x-3">
-            <label for="filter-running-checkbox" id="filter-running-label"
-              class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
-              Running only
-            </label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="filter-running-checkbox" class="hidden">
-              <span class="slider"></span>
-            </label>
-          </div>
 
+        <!-- Centre: stats pills (fills available space, wraps on small screens) -->
+        <div id="unified-stats-bar" class="unified-stats-bar flex-1 min-w-0">
+          <div id="container-stats" class="hidden"></div>
+          <div id="stats-divider" class="stats-divider hidden"></div>
+          <div id="security-dashboard-container"></div>
+        </div>
+
+        <!-- Right: action controls -->
+        <div class="flex items-center gap-2 flex-shrink-0 controls-container">
+          <!-- Refresh -->
           <button id="refresh-button" class="header-btn" data-tooltip="Refresh Data">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -58,42 +61,66 @@
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
-          <button id="traefik-routes-button" class="header-btn" data-tooltip="View all Traefik routes">
+
+          <!-- Traefik Routes -->
+          <button id="traefik-routes-button" class="header-btn header-btn-icon" data-tooltip="Traefik Routes">
             <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M13.74 4.23c-.84-1-1.57-2-1.71-2.22H12c-.14.21-.87 1.22-1.71 2.22-7.2 9.19 1.14 15.39 1.14 15.39l.57.41.57-.41s8.34-6.2 1.17-15.39zM12 19.48a3.48 3.48 0 01-.48-.35C9.4 17.44 6.68 13.25 10.22 7.63c.35-.55.65-1.07.92-1.55.25-.45.48-.86.68-1.21.2.35.43.76.68 1.21.27.48.57 1 .92 1.55 3.54 5.62.82 9.81-1.3 11.5a3.48 3.48 0 01-.12.35z"/>
             </svg>
-            Traefik Routes
           </button>
-          <button id="check-updates-button" class="header-btn">
+
+          <!-- Custom Registries -->
+          <button id="custom-registries-button" class="header-btn header-btn-icon" data-tooltip="Custom Registries">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </button>
+
+          <!-- Check for updates -->
+          <button id="check-updates-button" class="header-btn header-btn-icon" data-tooltip="Check for updates">
             <svg fill="currentColor" viewBox="2 2 52 52" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906 0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922 11.039 0 19.921 8.883 19.945 19.922.023 11.063-8.883 19.922-19.922 19.922m0-31.969c-.516 0-.89.188-1.36.656l-7.968 7.922c-.305.305-.445.727-.445 1.219 0 .96.726 1.688 1.687 1.688.492 0 .937-.188 1.242-.516l2.906-2.93 2.368-2.812-.188 4.945v12.21c0 1.032.727 1.759 1.758 1.759 1.008 0 1.758-.727 1.758-1.758V26.125l-.188-4.969 2.367 2.836 2.907 2.93c.304.351.726.515 1.242.515.96 0 1.71-.726 1.71-1.687 0-.492-.163-.914-.491-1.219l-7.922-7.922c-.469-.445-.867-.656-1.383-.656" />
             </svg>
-            Check for updates
           </button>
+
+          <!-- Logout -->
           <a href="{{ url_for('auth.logout') }}" id="logout-button"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 text-center font-medium">
-            Logout
+            class="header-btn header-btn-icon header-btn-danger" data-tooltip="Logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
           </a>
         </div>
       </div>
 
-      <div class="mb-4 relative flex items-center">
-        <input type="text" id="search-input"
-          placeholder="Search: name, image, stack, #tag, :port e.g. :3420, or :free 8000"
-          class="w-full p-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-        <div class="absolute right-18 flex items-center space-x-3">
-          <button id="clear-search-button" class="mr-3 text-gray-400 hover:text-gray-600 focus:outline-none hidden"
-            data-tooltip="Clear search">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+      <!-- ── Row 2: Search · Updates toggle · Column picker ── -->
+      <div class="header-row-2 mb-3 flex items-center gap-3">
+        <div class="flex-1 relative flex items-center">
+          <input type="text" id="search-input"
+            placeholder="Search: name, image, stack, #tag, :port e.g. :3420, or :free 8000"
+            class="w-full p-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <div class="absolute right-4 flex items-center gap-2">
+            <button id="clear-search-button" class="text-gray-400 hover:text-gray-600 focus:outline-none hidden"
+              data-tooltip="Clear search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
 
+        <!-- Updates filter toggle -->
+        <div class="flex items-center gap-2 flex-shrink-0">
           <label for="filter-updates-checkbox"
-            class="md:inline text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">            
+            class="text-sm cursor-pointer select-none header-label">
+            Updates only
           </label>
           <label class="toggle-switch">
             <input type="checkbox" id="filter-updates-checkbox" class="hidden">
@@ -101,157 +128,59 @@
           </label>
         </div>
 
-        <div id="column-menu-button" class="column-menu-container">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-            class="column-menu-svg">
-            <path
-              d="M8.97436 2.41026C8.25641 2.20513 7.23077 2 6.41026 2C5.58974 2 4.5641 2.20513 3.84615 2.41026C3.02564 2.51282 2.51282 3.23077 2.41026 3.94872C2.30769 5.48718 2 9.38462 2 12.0513C2 14.7179 2.30769 18.6154 2.41026 20.1538C2.51282 20.9744 3.02564 21.5897 3.74359 21.6923C4.46154 21.8974 5.48718 22 6.30769 22C7.1282 22 8.15385 21.7949 8.87179 21.6923C9.58974 21.4872 10.2051 20.8718 10.2051 20.1538C10.3077 18.6154 10.6154 14.7179 10.6154 12.0513C10.6154 9.38462 10.3077 5.48718 10.2051 3.94872C10.3077 3.23077 9.79487 2.51282 8.97436 2.41026Z"
-              fill="currentcolor"></path>
-            <path
-              d="M21.6923 3.94882C21.5897 3.12831 21.0769 2.51292 20.3589 2.41036C19.641 2.20523 18.6154 2.10266 17.7948 2.10266C16.9743 2.10266 15.8461 2.20523 15.1282 2.41036C14.4102 2.61548 13.7948 3.23087 13.7948 3.94882C13.6923 5.48728 13.3846 9.38472 13.3846 12.0514C13.3846 14.7181 13.6923 18.6155 13.7948 20.1539C13.8974 20.9745 14.4102 21.5898 15.1282 21.6924C15.8461 21.8975 16.8718 22.0001 17.6923 22.0001C18.5128 22.0001 19.5384 21.795 20.2564 21.6924C20.9743 21.4873 21.5897 20.8719 21.5897 20.1539C21.6923 18.6155 22 14.7181 22 12.0514C22 9.38472 21.7948 5.48728 21.6923 3.94882Z"
-              fill="currentcolor"></path>
-          </svg>
-          </svg>
+        <!-- REMOVED: Column visibility picker (panel layout makes it redundant) -->
+        <!-- PLACEHOLDER: keep hidden inputs so JS doesn't break on column toggles -->
+        <div id="column-menu-button" class="hidden">
           <div id="column-menu" class="column-menu hidden">
             <div id="column-list" class="column-list">
               <div class="column-menu-item draggable" data-column="name">
-                <div class="drag-handle">⋮⋮</div>
                 <label for="toggle-name">
-                  <span>Name</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-name" checked>
-                    <span class="slider"></span>
-                  </div>
+                  <input type="checkbox" id="toggle-name" checked>
                 </label>
               </div>
-
               <div class="column-menu-item draggable" data-column="stack">
-                <div class="drag-handle">⋮⋮</div>
                 <label for="toggle-stack">
-                  <span>Stack</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-stack" checked>
-                    <span class="slider"></span>
-                  </div>
+                  <input type="checkbox" id="toggle-stack" checked>
                 </label>
               </div>
-
               <div class="column-menu-item draggable" data-column="server">
-                <div class="drag-handle">⋮⋮</div>
                 <label for="toggle-server">
-                  <span>Server</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-server" checked>
-                    <span class="slider"></span>
-                  </div>
+                  <input type="checkbox" id="toggle-server" checked>
                 </label>
               </div>
-
               <div class="column-menu-item draggable" data-column="network">
-                <div class="drag-handle">⋮⋮</div>
                 <label for="toggle-network">
-                  <span>Network</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-network">
-                    <span class="slider"></span>
-                  </div>
+                  <input type="checkbox" id="toggle-network">
                 </label>
               </div>
-
               <div class="column-menu-item draggable" data-column="ip">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-ip">
-                  <span>IP</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-ip">
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-ip"><input type="checkbox" id="toggle-ip"></label>
               </div>
-
               <div class="column-menu-item draggable" data-column="ports">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-ports">
-                  <span>Ports</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-ports" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-ports"><input type="checkbox" id="toggle-ports" checked></label>
               </div>
 
               <div class="column-menu-item draggable" data-column="traefik">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-traefik">
-                  <span>Traefik</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-traefik" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-traefik"><input type="checkbox" id="toggle-traefik" checked></label>
               </div>
-
               <div class="column-menu-item draggable" data-column="image">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-image">
-                  <span>Image</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-image" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-image"><input type="checkbox" id="toggle-image" checked></label>
               </div>
-
               <div class="column-menu-item draggable" data-column="tags">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-tags">
-                  <span>Tags</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-tags" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-tags"><input type="checkbox" id="toggle-tags" checked></label>
               </div>
-
               <div class="column-menu-item draggable" data-column="security">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-security">
-                  <span>Security</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-security" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-security"><input type="checkbox" id="toggle-security" checked></label>
               </div>
-
               <div class="column-menu-item draggable" data-column="status">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-status">
-                  <span>Status</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-status" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-status"><input type="checkbox" id="toggle-status" checked></label>
               </div>
-
-
               <div class="column-menu-item draggable" data-column="logs">
-                <div class="drag-handle">⋮⋮</div>
-                <label for="toggle-logs">
-                  <span>Logs</span>
-                  <div class="toggle-switch">
-                    <input type="checkbox" id="toggle-logs" checked>
-                    <span class="slider"></span>
-                  </div>
-                </label>
+                <label for="toggle-logs"><input type="checkbox" id="toggle-logs" checked></label>
               </div>
             </div>
-
             <div class="column-menu-reset text-sm">
-              <a href="#" id="reset-columns-button" class="reset-columns-btn">
-                Reset all
-              </a>
+              <a href="#" id="reset-columns-button" class="reset-columns-btn">Reset all</a>
             </div>
           </div>
         </div>
@@ -261,84 +190,10 @@
 
       <div id="server-filter-container" class="mb-4 ml-2 flex flex-wrap gap-2"></div>
 
-      <!-- Unified Stats Bar: Container Stats + Security Dashboard -->
-      <div id="unified-stats-bar" class="unified-stats-bar mb-4 mx-2">
-        <div id="container-stats" class="hidden"></div>
-        <div id="stats-divider" class="stats-divider hidden"></div>
-        <div id="security-dashboard-container"></div>
-      </div>
 
     </div>
     <div id="container-table-wrapper" class="overflow-x-auto rounded-b-lg overflow-hidden pb-8">
-      <table id="main-table" class="min-w-full bg-white">
-        <thead class="main-table-header">
-          <tr>
-            <th
-              class="table-cell-name py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="name">
-              Name
-            </th>
-            <th
-              class=" table-cell-stack py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="stack">
-              Stack
-            </th>
-            <th
-              class="server-column table-cell-server py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header server-column"
-              data-sort-column="server">
-              Server
-            </th>
-            <th
-              class="table-cell-network py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="network">
-              Network
-            </th>
-            <th
-              class="table-cell-ip py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200"
-              data-sort-column="ip">
-              IP
-            </th>
-            <th
-              class="table-cell-ports py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="ports">
-              Ports
-            </th>
-            <th
-              class="traefik-column table-cell-traefik py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header traefik-column"
-              data-sort-column="traefik">
-              Traefik
-            </th>
-            <th
-              class="table-cell-image py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="image">
-              Image
-            </th>
-            <th
-              class="table-cell-tags py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 tags-column"
-              data-sort-column="tags">
-              Tags
-            </th>
-            <th
-              class="table-cell-security py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200"
-              data-sort-column="security">
-              Security
-            </th>
-            <th
-              class="table-cell-status py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
-              data-sort-column="status">
-              Status
-            </th>
-            <th
-              class="table-cell-logs py-3 px-2 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 logs-column"
-              data-sort-column="logs">
-
-            </th>
-
-          </tr>
-        </thead>
-        <tbody id="container-rows">
-        </tbody>
-      </table>
+      <div id="panels-container" class="panels-grid"></div>
     </div>
   </div>
 
@@ -363,7 +218,7 @@
               <path
                 d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
             </svg>
-            <span>Light</span>
+            <span>Light / Glass</span>
           </button>
           <button data-theme="dark" class="theme-menu-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor">
@@ -431,82 +286,8 @@
   </div>
   </div>
 
-  <template id="container-row-template">
-    <tr class="single-row-template">
-      <td class="py-3 px-4 border-b border-gray-200 font-medium container-name-cell" data-content="name">
-        <div class="container-name-wrapper inline-block items-center space-x-2">
-          <div class="name-wrapper">
-            <span data-content="container-name"></span>
-          </div>
-        </div>
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 text-gray-600 text-sm table-cell-stack" data-content="stack">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 text-gray-400 text-sm server-column" data-content="server">
-        <span data-content="server-name"></span>
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 text-sm" data-content="network">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 text-sm" data-content="ip">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200" data-content="ports">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 traefik-column" data-content="traefik-routes">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 table-cell-image">
-        <div class="flex items-center space-x-2">
-          <div class="image-wrapper">
-            <div class="image-wrapper-inline">
-              <code class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm" data-content="image"></code>
-            </div>
-
-            <span class="update-indicator hidden" data-content="update-indicator" data-server="" data-container="">
-              <svg fill="currentColor" width="20" height="20" viewBox="2 2 52 52" xmlns="http://www.w3.org/2000/svg"
-                class="text-orange-500 hover:text-orange-600">
-                <path
-                  d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906 0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922 11.039 0 19.921 8.883 19.945 19.922.023 11.063-8.883 19.922-19.922 19.922m0-31.969c-.516 0-.89.188-1.36.656l-7.968 7.922c-.305.305-.445.727-.445 1.219 0 .96.726 1.688 1.687 1.688.492 0 .937-.188 1.242-.516l2.906-2.93 2.368-2.812-.188 4.945v12.21c0 1.032.727 1.759 1.758 1.759 1.008 0 1.758-.727 1.758-1.758V26.125l-.188-4.969 2.367 2.836 2.907 2.93c.304.351.726.515 1.242.515.96 0 1.71-.726 1.71-1.687 0-.492-.163-.914-.491-1.219l-7.922-7.922c-.469-.445-.867-.656-1.383-.656" />
-              </svg>
-            </span>
-
-            <span class="new-version-indicator hidden" data-content="new-version-indicator" data-server="" data-container="" data-image="">
-              <svg fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                class="text-green-500 hover:text-green-600 cursor-pointer">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-              </svg>
-            </span>
-
-            <a href="#" class="registry-link hidden text-gray-500 hover:text-blue-600" data-content="registry-link"
-              target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
-                </path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </a>
-
-            <a href="#" class="source-link hidden text-gray-500 hover:text-blue-600" data-content="source-link"
-              target="_blank" rel="noopener noreferrer">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-              </svg>
-            </a>
-
-          </div>
-        </div>
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 table-cell-tags" data-content="tags">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 table-cell-security" data-content="security">
-      </td>
-      <td class="py-3 px-4 border-b border-gray-200 table-cell-status" data-content="status">
-      </td>
-      <td class="py-3 px-2 border-b border-gray-200 table-cell-logs" data-content="logs">
-      </td>
-    </tr>
+  <template id="container-panel-template">
+    {% include '_panel.html' %}
   </template>
 
   <div id="confirmation-modal" class="modal-overlay hidden">
@@ -799,6 +580,43 @@
 
       <div class="flex justify-end mt-4 pt-4 border-t">
         <button id="traefik-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Registries Modal -->
+  <div id="custom-registries-modal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Custom Registry Configuration
+        </h3>
+        <button id="registries-modal-close" class="text-gray-500 hover:text-gray-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mb-4 p-3 rounded-lg registry-info-box">
+        <p class="text-sm mb-2">Custom registries let DockPeek link home-grown images to their registry pages. Configure them via the <code>CUSTOM_REGISTRY_TEMPLATES</code> environment variable.</p>
+        <p class="text-sm registry-hint">Format: <code>{"registry.host": {"urlTemplate": "https://.../{1}/{2}"}}</code></p>
+      </div>
+
+      <div id="registries-list" class="mb-4">
+        <div class="text-center text-gray-500 py-6">Loading configured registries...</div>
+      </div>
+
+      <div class="p-3 rounded-lg registry-example-box mb-4">
+        <p class="text-xs font-semibold mb-2 registry-example-label">Example — private GitLab registry:</p>
+        <pre class="text-xs registry-example-code overflow-x-auto">CUSTOM_REGISTRY_TEMPLATES='{"registry.example.com": {"urlTemplate": "https://registry.example.com/{1}/{2}"}}'</pre>
+      </div>
+
+      <div class="flex justify-end mt-2">
+        <button id="registries-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
           Close
         </button>
       </div>

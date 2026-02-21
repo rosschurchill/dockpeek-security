@@ -21,7 +21,7 @@ export function setCachedServerStatus(servers) {
 
 export function setupServerUI() {
   const serverFilterContainer = document.getElementById("server-filter-container");
-  const mainTable = document.getElementById("main-table");
+  const mainTable = document.getElementById("main-table"); // may be null in panel layout
   serverFilterContainer.innerHTML = '';
   let servers = getCachedServerStatus();
   if (!servers) {
@@ -31,7 +31,7 @@ export function setupServerUI() {
     servers = [...servers];
   }
   if (servers.length > 1) {
-    mainTable.classList.remove('table-single-server');
+    mainTable?.classList.remove('table-single-server');
     serverFilterContainer.classList.remove('hidden');
 
     servers.sort((a, b) => {
@@ -73,7 +73,7 @@ export function setupServerUI() {
     });
 
   } else {
-    mainTable.classList.add('table-single-server');
+    mainTable?.classList.add('table-single-server');
     serverFilterContainer.classList.add('hidden');
   }
 
@@ -151,7 +151,6 @@ export function parseAdvancedSearch(searchTerm) {
 
 export function updateDisplay() {
   const searchInput = document.getElementById("search-input");
-  const filterRunningCheckbox = document.getElementById("filter-running-checkbox");
   const filterUpdatesCheckbox = document.getElementById("filter-updates-checkbox");
   const mainTable = document.getElementById("main-table");
 
@@ -163,40 +162,26 @@ export function updateDisplay() {
     statsData = statsData.filter(c => c.server === state.currentServerFilter);
   }
 
-  // Swarm mode: repurpose toggle to "Show Problems"
-  const swarmMode = isSwarmMode();
-  const filterLabel = document.getElementById('filter-running-label');
-  const filterContainer = filterRunningCheckbox.parentElement;
-
-  if (swarmMode) {
-    filterLabel.textContent = 'Show Problems';
-    filterLabel.setAttribute('data-tooltip', 'Show only services where not all replicas are running');
-    filterContainer.classList.add('swarm-mode');
-  } else {
-    filterLabel.textContent = 'Running only';
-    filterLabel.setAttribute('data-tooltip', 'Show only running and healthy containers');
-    filterContainer.classList.remove('swarm-mode');
-  }
-
-  filterContainer.classList.remove('hidden');
-
-  if (filterRunningCheckbox.checked) {
-    if (swarmMode) {
-      workingData = workingData.filter(c => {
-        if (typeof c.status === 'string') {
-          const m = c.status.match(/^running \((\d+)\/(\d+)\)$/);
-          if (m) {
-            const running = parseInt(m[1], 10);
-            const desired = parseInt(m[2], 10);
-            return running < desired;
-          }
-          if (c.status === 'no-tasks') return true;
-        }
-        return false;
-      });
-    } else {
+  // Status filter driven by clickable stat pills
+  switch (state.statusFilter) {
+    case 'running':
       workingData = workingData.filter(c => c.status === 'running' || c.status === 'healthy');
-    }
+      break;
+    case 'stopped':
+      workingData = workingData.filter(c => c.status === 'exited' || c.status === 'dead');
+      break;
+    case 'unhealthy':
+      workingData = workingData.filter(c => c.status === 'unhealthy');
+      break;
+    case 'paused':
+      workingData = workingData.filter(c => c.status === 'paused');
+      break;
+    case 'other':
+      workingData = workingData.filter(c => !['running', 'healthy', 'exited', 'dead', 'paused', 'unhealthy'].includes(c.status?.toLowerCase()));
+      break;
+    case 'stacked':
+      workingData = workingData.filter(c => c.stack && c.stack.trim());
+      break;
   }
 
   if (filterUpdatesCheckbox.checked) {
@@ -392,9 +377,9 @@ export function updateDisplay() {
   });
 
   if (shouldHideServerColumn) {
-    mainTable.classList.add('table-single-server');
+    mainTable?.classList.add('table-single-server');
   } else {
-    mainTable.classList.remove('table-single-server');
+    mainTable?.classList.remove('table-single-server');
   }
 
   state.filteredAndSortedContainers.splice(0, state.filteredAndSortedContainers.length, ...workingData);
@@ -419,7 +404,6 @@ export function filterByStackAndServer(stack, server) {
 
 export function filterByContainerName(containerName, server) {
   const searchInput = document.getElementById("search-input");
-  const filterRunningCheckbox = document.getElementById("filter-running-checkbox");
   const filterUpdatesCheckbox = document.getElementById("filter-updates-checkbox");
 
   const container = state.allContainersData.find(
@@ -428,8 +412,7 @@ export function filterByContainerName(containerName, server) {
 
   state.currentServerFilter = server;
   updateActiveButton();
-  //sliders
-  filterRunningCheckbox.checked = false;
+  state.statusFilter = null;
   filterUpdatesCheckbox.checked = false;
   //id
   if (container?.container_id) {

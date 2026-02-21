@@ -1,8 +1,8 @@
 export function showLoadingIndicator() {
   const refreshButton = document.getElementById('refresh-button');
-  const containerRowsBody = document.getElementById("container-rows");
+  const containerRowsBody = document.getElementById("panels-container");
   refreshButton.classList.add('loading');
-  containerRowsBody.innerHTML = `<tr><td colspan=9"><div class="loader"></div></td></tr>`;
+  containerRowsBody.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem"><div class="loader"></div></div>`;
 }
 
 export function hideLoadingIndicator() {
@@ -11,9 +11,9 @@ export function hideLoadingIndicator() {
 }
 
 export function displayError(message) {
-  const containerRowsBody = document.getElementById("container-rows");
+  const containerRowsBody = document.getElementById("panels-container");
   hideLoadingIndicator();
-  containerRowsBody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-500">${message}</td></tr>`;
+  containerRowsBody.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#ef4444">${message}</div>`;
 }
 
 export function initCustomTooltips() {

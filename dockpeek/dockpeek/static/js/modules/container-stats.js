@@ -1,4 +1,6 @@
 // modules/container-stats.js
+import { state } from './state.js';
+
 export function calculateStats(containers) {
   const stats = {
     running: 0,
@@ -7,13 +9,16 @@ export function calculateStats(containers) {
     stopped: 0,
     paused: 0,
     other: 0,
-    total: 0
+    total: 0,
+    stacks: 0
   };
+
+  const stackNames = new Set();
 
   containers.forEach(container => {
     stats.total++;
     const status = container.status?.toLowerCase() || '';
-    
+
     if (status === 'healthy') {
       stats.running++;
       stats.healthy++;
@@ -28,8 +33,13 @@ export function calculateStats(containers) {
     } else {
       stats.other++;
     }
+
+    if (container.stack && container.stack.trim()) {
+      stackNames.add(container.stack.trim());
+    }
   });
 
+  stats.stacks = stackNames.size;
   return stats;
 }
 
@@ -41,41 +51,40 @@ const icons = {
   stopped: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>',
   paused: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>',
   other: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-  healthy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>'
+  stacks: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>'
 };
+
+function pill(cls, filterKey, tooltip, icon, count) {
+  const active = state.statusFilter === filterKey ? ' stat-active' : '';
+  return `<button class="stat-item ${cls}${active}" data-filter="${filterKey}" data-tooltip="${tooltip}" type="button">${icon}${count}</button>`;
+}
 
 export function updateStatsDisplay(stats) {
   const container = document.getElementById('container-stats');
   if (!container) return;
 
   const items = [];
-  
+
   if (stats.total > 0) {
-    items.push(`<span class="stat-item stat-total" data-tooltip="Total containers">${icons.total}${stats.total}</span>`);
+    items.push(pill('stat-total', 'all', 'All containers', icons.total, stats.total));
   }
-  
   if (stats.running > 0) {
-    let runningText = `${stats.running}`;
-      /*
-    if (stats.healthy > 0) {
-      runningText += ` <span class="stat-detail" data-tooltip="Healthy containers">(${icons.healthy}${stats.healthy})</span>`;
-    }
-        */
-    items.push(`<span class="stat-item stat-running" data-tooltip="Running containers">${icons.running}${runningText}</span>`);
+    items.push(pill('stat-running', 'running', 'Running containers — click to filter', icons.running, stats.running));
   }
-  
   if (stats.unhealthy > 0) {
-    items.push(`<span class="stat-item stat-unhealthy" data-tooltip="Unhealthy containers">${icons.unhealthy}${stats.unhealthy}</span>`);
+    items.push(pill('stat-unhealthy', 'unhealthy', 'Unhealthy containers — click to filter', icons.unhealthy, stats.unhealthy));
   }
   if (stats.paused > 0) {
-    items.push(`<span class="stat-item stat-paused" data-tooltip="Paused containers">${icons.paused}${stats.paused}</span>`);
+    items.push(pill('stat-paused', 'paused', 'Paused containers — click to filter', icons.paused, stats.paused));
   }
   if (stats.other > 0) {
-    items.push(`<span class="stat-item stat-other" data-tooltip="Other status containers">${icons.other}${stats.other}</span>`);
+    items.push(pill('stat-other', 'other', 'Other status — click to filter', icons.other, stats.other));
   }
-
   if (stats.stopped > 0) {
-    items.push(`<span class="stat-item stat-stopped" data-tooltip="Stopped containers">${icons.stopped}${stats.stopped}</span>`);
+    items.push(pill('stat-stopped', 'stopped', 'Stopped containers — click to filter', icons.stopped, stats.stopped));
+  }
+  if (stats.stacks > 0) {
+    items.push(pill('stat-stacks', 'stacked', `${stats.stacks} stacks — click to filter`, icons.stacks, stats.stacks));
   }
 
   const divider = document.getElementById('stats-divider');
@@ -93,4 +102,21 @@ export function updateStatsDisplay(stats) {
 export function updateContainerStats(containers) {
   const stats = calculateStats(containers);
   updateStatsDisplay(stats);
+}
+
+let _refreshFn = null;
+
+export function initStatsFilter(refreshFn) {
+  _refreshFn = refreshFn;
+  const statsContainer = document.getElementById('container-stats');
+  if (!statsContainer) return;
+
+  statsContainer.addEventListener('click', (e) => {
+    const pill = e.target.closest('[data-filter]');
+    if (!pill) return;
+    const filter = pill.dataset.filter;
+    // 'all' or same filter again → clear; otherwise set
+    state.statusFilter = (filter === 'all' || state.statusFilter === filter) ? null : filter;
+    _refreshFn();
+  });
 }

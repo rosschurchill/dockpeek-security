@@ -24,6 +24,7 @@ export function updateColumnVisibility() {
 
 export function updateFirstAndLastVisibleColumns() {
   const table = document.querySelector('#main-table');
+  if (!table) return;
   const rows = Array.from(table.querySelectorAll('tr'));
 
   rows.forEach(row => {

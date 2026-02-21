@@ -18,6 +18,8 @@ export const state = {
   // Trivy security scanning state
   trivyEnabled: false,
   trivyHealthy: false,
+  groupByStack: false,
+  statusFilter: null,  // 'running'|'stopped'|'unhealthy'|'paused'|'other'|'stacked'|null
   columnOrder: ['name', 'stack', 'server', 'network', 'ip', 'ports', 'traefik', 'image', 'tags', 'security', 'logs', 'status'],
   columnVisibility: {
     name: true,

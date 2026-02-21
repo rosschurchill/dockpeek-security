@@ -91,6 +91,12 @@ export function renderSecurityDashboard(containers) {
   // Build stats array - same format as container stats
   const stats = [];
 
+  // CVE total pill — shown only when there are vulnerabilities
+  if (summary.total > 0) {
+    const shieldIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+    stats.push(`<span class="stat-item stat-cve-total" data-tooltip="Total CVEs across all containers">${shieldIcon}${summary.total}</span>`);
+  }
+
   if (summary.critical > 0) {
     stats.push(`<span class="stat-item stat-critical" data-tooltip="Critical vulnerabilities">${securityIcons.critical}${summary.critical}</span>`);
   }

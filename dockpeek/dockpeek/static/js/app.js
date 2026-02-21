@@ -10,15 +10,16 @@ import { updateDisplay, parseAdvancedSearch, filterByStackAndServer, toggleClear
 import { showUpdatesModal, showNoUpdatesModal, showConfirmationModal } from './modules/modals.js';
 import { initEventListeners, initLogsButtons } from './modules/events.js';
 import { updateSwarmIndicator, initSwarmIndicator, isSwarmMode } from './modules/swarm-indicator.js';
-import { updateContainerStats } from './modules/container-stats.js';
+import { updateContainerStats, initStatsFilter } from './modules/container-stats.js';
 import { loadRegistryTemplates } from './modules/registry-urls.js';
 import { initVulnerabilityModal } from './modules/vulnerability-modal.js';
 import { initTraefikRoutes } from './modules/traefik-routes.js';
 import { initVersionModal } from './modules/version-check.js';
 import { initSecurityDashboard, updateSecurityDashboard } from './modules/security-dashboard.js';
 import { initSecurityNotifications } from './modules/security-notifications.js';
+import { initCustomRegistries } from './modules/custom-registries.js';
 
-const tableRenderer = new TableRenderer('container-row-template', 'container-rows');
+const tableRenderer = new TableRenderer('container-panel-template', 'panels-container');
 let dragDropHandler = null;
 
 export function renderTable() {
@@ -40,8 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initVulnerabilityModal();
   initTraefikRoutes();
   initVersionModal();
+  initStatsFilter(updateDisplay);
   initSecurityDashboard();
   initSecurityNotifications();
+  initCustomRegistries();
   loadRegistryTemplates();
   fetchContainerData();
   initEventListeners();

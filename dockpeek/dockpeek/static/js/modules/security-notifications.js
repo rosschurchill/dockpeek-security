@@ -19,7 +19,6 @@ class SecurityNotifications {
    * Initialize the notification system.
    */
   init() {
-    this.injectBellIcon();
     this.bindEvents();
     this.checkForNewCriticals();
 

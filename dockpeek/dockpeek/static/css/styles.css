@@ -12,9 +12,16 @@ body {
   color: #24292e;
 }
 
-/* Dark mode body - gradient background */
+/* Light mode glassmorphism background */
+body:not(.dark-mode) {
+  background: linear-gradient(135deg, #bfdbfe 0%, #c7d2fe 25%, #ddd6fe 55%, #fce7f3 85%, #fed7aa 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Dark mode body - rich coloured dark gradient */
 body.dark-mode {
-  background: linear-gradient(180deg, #0a0d12 0%, #111827 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #1a1035 65%, #0f172a 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -59,9 +66,22 @@ button svg {
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Transparent wrapper — no box */
+.page-wrapper {
+  max-width: 1600px;
+}
+
+body:not(.dark-mode) .container {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: none !important;
+}
+
 body.dark-mode .container {
-  background: linear-gradient(135deg, #151a23 0%, #1a202c 100%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent !important;
+  border: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
@@ -316,6 +336,16 @@ input[type="text"] {
   width: 100%;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+}
+
+/* Light mode: glassmorphic search input */
+body:not(.dark-mode) input[type="text"] {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(31, 38, 135, 0.06);
+  color: #1e293b;
 }
 
 #search-input {
@@ -1309,6 +1339,13 @@ body.dark-mode .header-btn {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Icon-only variant — square, no extra horizontal padding */
+.header-btn-icon {
+  padding: 0 !important;
+  width: 36px !important;
+  min-width: 36px !important;
+}
+
 /* Check Updates Button - Green accent */
 #check-updates-button {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.06) 100%);
@@ -1634,27 +1671,203 @@ body.dark-mode .prune-details-list {
 
 
 /* ======================================== */
-/* Unified Stats Bar (Container + Security) */
+/* 2-Row Header Layout                      */
+/* ======================================== */
+
+.header-row-1,
+.header-row-2 {
+  min-height: 42px;
+}
+
+/* "Running only" / "Updates only" label in header */
+.header-label {
+  color: #babdc1;
+  white-space: nowrap;
+}
+
+body.dark-mode .header-label {
+  color: #5c616b;
+}
+
+/* Danger variant for Logout button */
+.header-btn-danger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.06) 100%);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.header-btn-danger:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.12) 100%);
+  color: #b91c1c;
+}
+
+body.dark-mode .header-btn-danger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+body.dark-mode .header-btn-danger:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.15) 100%);
+  color: #fca5a5;
+}
+
+/* Custom Registries button - slate/teal accent */
+#custom-registries-button {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(20, 184, 166, 0.06) 100%);
+  color: #0d9488;
+  border-color: rgba(20, 184, 166, 0.3);
+}
+
+#custom-registries-button:hover {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(20, 184, 166, 0.12) 100%);
+  color: #0f766e;
+}
+
+body.dark-mode #custom-registries-button {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(20, 184, 166, 0.08) 100%);
+  border-color: rgba(20, 184, 166, 0.35);
+  color: #2dd4bf;
+}
+
+body.dark-mode #custom-registries-button:hover {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.25) 0%, rgba(20, 184, 166, 0.15) 100%);
+  color: #5eead4;
+}
+
+/* ── Custom Registries Modal ── */
+.registry-info-box {
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #374151;
+}
+
+body.dark-mode .registry-info-box {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #cbd5e1;
+}
+
+.registry-hint {
+  color: #6b7280;
+}
+
+body.dark-mode .registry-hint {
+  color: #94a3b8;
+}
+
+.registry-example-box {
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body.dark-mode .registry-example-box {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.registry-example-label {
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark-mode .registry-example-label {
+  color: #94a3b8;
+}
+
+.registry-example-code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  color: #374151;
+  line-height: 1.6;
+}
+
+body.dark-mode .registry-example-code {
+  color: #94a3b8;
+}
+
+.registry-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.registry-entry:last-child {
+  border-bottom: none;
+}
+
+body.dark-mode .registry-entry {
+  border-color: #21262d;
+}
+
+.registry-host {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0d9488;
+  min-width: 180px;
+}
+
+body.dark-mode .registry-host {
+  color: #2dd4bf;
+}
+
+.registry-template {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: #6b7280;
+  word-break: break-all;
+}
+
+body.dark-mode .registry-template {
+  color: #94a3b8;
+}
+
+.registry-empty {
+  text-align: center;
+  padding: 24px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+#registries-list {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+body.dark-mode #registries-list {
+  border-color: #30363d;
+}
+
+/* ======================================== */
+/* Unified Stats Bar (inline in header)     */
 /* ======================================== */
 /* STATS BAR                               */
 /* ======================================== */
 
-/* Bar container */
+/* Bar container — now inline, no background box */
 .unified-stats-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
   flex-wrap: wrap;
-  min-height: 46px;
+  min-height: 34px;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
 body:not(.dark-mode) .unified-stats-bar {
-  background: rgba(15, 23, 42, 0.04);
-  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: none;
+  border: none;
 }
 
 /* Wrapper divs */
@@ -1702,7 +1915,14 @@ body:not(.dark-mode) .stats-divider {
   color: #94a3b8;
   border: 1px solid rgba(255, 255, 255, 0.06);
   white-space: nowrap;
-  cursor: default;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+button.stat-item:hover { opacity: 0.8; transform: translateY(-1px); }
+button.stat-item:active { transform: translateY(0); }
+button.stat-item.stat-active {
+  box-shadow: 0 0 0 2px currentColor;
+  opacity: 1 !important;
 }
 
 body:not(.dark-mode) .stat-item,
@@ -1806,6 +2026,18 @@ body:not(.dark-mode) .stat-pill-other {
   border-color: rgba(139, 92, 246, 0.2);
 }
 
+/* Stacks */
+.stat-stacks {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+body:not(.dark-mode) .stat-stacks {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0284c7;
+  border-color: rgba(14, 165, 233, 0.25);
+}
+
 /* ── Security stat colours — match vuln badge palette ── */
 
 /* Critical */
@@ -1866,6 +2098,20 @@ body:not(.dark-mode) .stat-scanned {
   background: rgba(59, 130, 246, 0.08);
   color: #2563eb;
   border-color: rgba(59, 130, 246, 0.15);
+}
+
+/* CVE Total */
+.stat-cve-total {
+  background: rgba(255,255,255,0.08);
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,0.12);
+  font-weight: 700;
+}
+body:not(.dark-mode) .stat-cve-total {
+  background: rgba(15,23,42,0.07);
+  color: #334155;
+  border-color: rgba(15,23,42,0.12);
+  font-weight: 700;
 }
 
 /* Column visibility classes */
@@ -2127,36 +2373,59 @@ body.dark-mode .custom-tooltip-arrow.arrow-right {
   padding-right: 3rem
 }
 
-/* Table Rows - Modern styling with zebra stripes */
-.single-row-template {
-  background-color: #ffffff !important;
+/* Table Rows - Glassmorphism card style */
+/* Row gaps via border-spacing */
+#main-table { border-collapse: separate; border-spacing: 0 8px; }
+#main-table td { border-bottom: none !important; }
+
+/* backdrop-filter on <td> (more reliable cross-browser than <tr>) */
+.single-row-template td {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.75);
+  border-top: 1px solid rgba(255,255,255,0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.85);
   transition: background-color 0.15s ease;
 }
 
-.single-row-template:nth-child(even) {
-  background-color: #f8fafc !important;
-}
-
-.single-row-template:hover {
-  background-color: #eef2ff !important;
-}
-
-/* Dark mode zebra stripes */
-body.dark-mode .single-row-template {
-  background-color: transparent !important;
-}
-
-body.dark-mode .single-row-template:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02) !important;
-}
-
-body.dark-mode .single-row-template:hover {
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.03) 100%) !important;
-}
+.single-row-template:hover td { background: rgba(238,242,255,0.9) !important; }
 
 body.dark-mode .single-row-template td {
-  border-color: rgba(255, 255, 255, 0.04);
+  background: rgba(30,41,59,0.65);
+  border-top-color: rgba(255,255,255,0.07);
+  border-bottom-color: rgba(255,255,255,0.07);
 }
+
+body.dark-mode .single-row-template:hover td {
+  background: rgba(59,130,246,0.1) !important;
+}
+
+/* Card shape using .first-visible/.last-visible (applied by column-visibility.js) */
+.single-row-template .first-visible {
+  border-left: 1px solid rgba(255,255,255,0.85);
+  border-radius: 10px 0 0 10px;
+}
+
+.single-row-template .last-visible {
+  border-right: 1px solid rgba(255,255,255,0.85);
+  border-radius: 0 10px 10px 0;
+}
+
+body.dark-mode .single-row-template .first-visible { border-left-color: rgba(255,255,255,0.07); }
+body.dark-mode .single-row-template .last-visible { border-right-color: rgba(255,255,255,0.07); }
+
+/* Box shadows on the <tr> itself (works with border-collapse:separate) */
+.single-row-template {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+body.dark-mode .single-row-template {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Kill zebra stripes */
+.single-row-template:nth-child(even),
+body.dark-mode .single-row-template:nth-child(even) { background: inherit !important; }
 
 .buycoffe:hover {
   color: #ddab30;
@@ -2176,34 +2445,22 @@ body.dark-mode .single-row-template td {
     padding: 0.5rem;
   }
 
-  .flex.justify-between.items-center.mb-6 {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 1rem;
+  /* Stack header rows on very small screens */
+  .header-row-1 {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
-  .controls-container {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 1rem;
+  .header-row-1 .controls-container {
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
-  .controls-container>* {
-    margin-bottom: 0.5rem;
-    width: 100%;
-  }
-
-  .py-3.px-4 {
-    padding: 0.5rem 0.75rem;
-  }
-
-  .min-w-full {
-    min-width: unset;
-  }
-
-  .overflow-x-auto {
-    /* overflow-x: hidden;*/
+  /* Hide text labels on tiny screens, show icon-only buttons */
+  #traefik-routes-button span,
+  #check-updates-button span,
+  #custom-registries-button span {
+    display: none;
   }
 
   .update-indicator {
@@ -2248,48 +2505,28 @@ body.dark-mode .single-row-template td {
     content: none !important;
   }
 
-  .flex.justify-between.items-center.mb-6 {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 1rem;
+  .header-row-1 {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
-  .status-filter {
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    height: 100%;
+  .header-row-1 .controls-container {
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 0;
+    width: auto;
   }
 
-  .column-menu-container {
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    height: 100%;
-  }
-
-  .controls-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .controls-container>* {
-    margin-bottom: 0.5rem;
-    width: 100%;
+  /* Condense button labels on medium screens */
+  #traefik-routes-button,
+  #custom-registries-button,
+  #check-updates-button {
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
   }
 
   .py-3.px-4 {
     padding: 0.5rem 0.75rem;
-  }
-
-  .min-w-full {
-    min-width: unset;
   }
 
   .min-w-full {
@@ -3106,3 +3343,586 @@ body.dark-mode .vuln-item-new {
 
 /* Anchor update warning arrow */
 .update-indicator.orc-anchor-update { color: #f59e0b !important; }
+
+/* ── Stack Group Headers (Group-by-Stack feature) ── */
+.stack-group-header td {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+.stack-group-header {
+  box-shadow: none !important;
+}
+.stack-group-header-cell {
+  padding: 16px 0 6px 4px !important;
+}
+.stack-group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.stack-group-toggle:hover {
+  color: #334155;
+  background: rgba(0,0,0,0.04);
+}
+body.dark-mode .stack-group-toggle {
+  color: #4b5563;
+}
+body.dark-mode .stack-group-toggle:hover {
+  color: #94a3b8;
+  background: rgba(255,255,255,0.05);
+}
+.stack-group-chevron {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.stack-group-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+.stack-group-name { /* inherits */ }
+.stack-group-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: rgba(100,116,139,0.15);
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+body.dark-mode .stack-group-count {
+  background: rgba(100,116,139,0.2);
+  color: #94a3b8;
+}
+
+/* ============================================================ */
+/* === PANEL GRID REDESIGN                                   === */
+/* === Glassmorphism card layout replacing table-row cards   === */
+/* ============================================================ */
+
+/* ---- Layout: shared, theme-agnostic ---- */
+
+.panels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.container-panel {
+  display: flex;
+  border-radius: 14px;
+  overflow: visible;
+  min-height: 116px;
+  padding: 7px;
+  gap: 7px;
+  align-items: stretch;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.container-panel:hover {
+  transform: translateY(-1px);
+}
+
+.panel-main {
+  flex: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  border-radius: 9px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Running badge in header */
+.panel-running-badge--active {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.panel-running-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* CVE traffic lights */
+.cve-traffic-lights {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.cve-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: default;
+}
+
+.cve-critical { background: rgba(239,68,68,0.2);  color: #ef4444; border: 1px solid rgba(239,68,68,0.4); }
+.cve-high     { background: rgba(249,115,22,0.2); color: #f97316; border: 1px solid rgba(249,115,22,0.4); }
+.cve-medium   { background: rgba(234,179,8,0.2);  color: #eab308; border: 1px solid rgba(234,179,8,0.4); }
+.cve-low      { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+/* Logs button */
+.panel-logs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 6px;
+  opacity: 0.65;
+  transition: opacity 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.panel-logs-btn:hover {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.3);
+}
+
+.panel-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.panel-identity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panel-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-image-name {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-gear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.panel-gear-btn:hover {
+  opacity: 1;
+}
+
+.panel-cols {
+  display: flex;
+  gap: 16px;
+}
+
+.panel-col-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 60px;
+}
+
+.panel-col-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  opacity: 0.6;
+}
+
+.panel-col-value {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Port badges inside panels */
+.panel-col-value .badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+.panel-status-section {
+  width: 120px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 9px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.panel-status-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.panel-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b7280;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.panel-status-text {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* ---- CVE status box (inside .panel-status-section) ---- */
+
+.panel-cve-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* Clean shield state */
+.cve-clean-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4ade80;
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.5));
+}
+
+.cve-clean-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4ade80;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+/* CVE rows (has vulnerabilities) */
+.cve-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.cve-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cve-row-label {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Pip dot */
+.cve-pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Critical */
+.cve-row-critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.cve-pip-critical { background: #ef4444; box-shadow: 0 0 4px rgba(239, 68, 68, 0.6); }
+
+/* High */
+.cve-row-high { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+.cve-pip-high { background: #f97316; box-shadow: 0 0 4px rgba(249, 115, 22, 0.6); }
+
+/* Medium */
+.cve-row-medium { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+.cve-pip-medium { background: #eab308; box-shadow: 0 0 4px rgba(234, 179, 8, 0.6); }
+
+/* Low */
+.cve-row-low { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+.cve-pip-low { background: #4ade80; box-shadow: 0 0 4px rgba(74, 222, 128, 0.5); }
+
+/* Panel status section tinting by worst CVE severity */
+.cve-sev-critical .panel-status-section { border-color: rgba(239, 68, 68, 0.3) !important; }
+.cve-sev-high     .panel-status-section { border-color: rgba(249, 115, 22, 0.3) !important; }
+.cve-sev-medium   .panel-status-section { border-color: rgba(234, 179, 8, 0.3) !important; }
+.cve-sev-low      .panel-status-section { border-color: rgba(74, 222, 128, 0.3) !important; }
+.cve-clean        .panel-status-section { border-color: rgba(74, 222, 128, 0.25) !important; }
+
+/* Stack group headers (div-based, replacing table-row variant) */
+.stack-group-header {
+  margin-bottom: 4px;
+  margin-top: 8px;
+}
+
+.stack-group-header-cell {
+  padding: 0;
+}
+
+/* ---- Dark mode panel styles ---- */
+
+/* Dark mode: genuine glass — let the gradient bleed through */
+body.dark-mode .container-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+body.dark-mode .panel-main {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 9px;
+}
+
+body.dark-mode .panel-status-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Running — soft green dot only, glass stays glass */
+body.dark-mode .container-panel.is-running .panel-status-section {
+  background: rgba(34, 197, 94, 0.07);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+body.dark-mode .container-panel.is-running .panel-status-dot {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+body.dark-mode .container-panel.is-running .panel-status-text {
+  color: #86efac;
+}
+
+body.dark-mode .container-panel.is-running .panel-status-count {
+  color: #f1f5f9;
+}
+
+/* Running badge in header */
+body.dark-mode .panel-running-badge--active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+body.dark-mode .panel-running-dot {
+  background: #4ade80;
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.6);
+}
+
+/* Dark mode panel text */
+body.dark-mode .panel-name {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+body.dark-mode .panel-image-name {
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 12px;
+}
+
+body.dark-mode .panel-col-label {
+  color: rgba(100, 116, 139, 0.9);
+  font-size: 11px;
+}
+
+body.dark-mode .panel-col-value {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+body.dark-mode .panel-status-count {
+  color: #f8fafc;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+body.dark-mode .panel-status-ratio {
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 13px;
+}
+
+/* ---- Light mode (glassmorphism) panel styles ---- */
+
+body:not(.dark-mode) .container-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+body:not(.dark-mode) .panel-status-section {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body:not(.dark-mode) .panel-logs-btn {
+  border-color: rgba(0,0,0,0.1);
+}
+
+body:not(.dark-mode) .panel-logs-btn:hover {
+  border-color: rgba(0,0,0,0.25);
+}
+
+body:not(.dark-mode) .panel-running-badge--active {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+body:not(.dark-mode) .panel-running-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 4px rgba(59, 130, 246, 0.6);
+}
+
+body:not(.dark-mode) .container-panel.is-running .panel-status-section {
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: rgba(240, 253, 244, 0.8);
+}
+
+body:not(.dark-mode) .container-panel.is-running .panel-status-dot {
+  background: #22c55e;
+  box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+}
+
+body:not(.dark-mode) .container-panel.is-running .panel-status-text {
+  color: #16a34a;
+}
+
+body:not(.dark-mode) .panel-running-badge--active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+body:not(.dark-mode) .panel-running-dot {
+  background: #22c55e;
+}
+
+/* Light mode panel text */
+body:not(.dark-mode) .panel-name {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+body:not(.dark-mode) .panel-image-name {
+  color: #64748b;
+  font-size: 12px;
+}
+
+body:not(.dark-mode) .panel-col-label {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+body:not(.dark-mode) .panel-col-value {
+  color: #475569;
+}
+
+body:not(.dark-mode) .panel-status-count {
+  color: #1e293b;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+body:not(.dark-mode) .panel-status-ratio {
+  color: #64748b;
+}
+
+/* ============================================================ */
+/* === END PANEL GRID REDESIGN                               === */
+/* ============================================================ */

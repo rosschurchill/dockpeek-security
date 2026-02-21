@@ -33,6 +33,8 @@ export function load() {
 
 export function updateTableOrder() {
   const thead = document.querySelector('#main-table thead tr');
+  if (!thead) return;
+
   const headers = Array.from(thead.children);
 
   state.columnOrder.forEach(columnName => {
