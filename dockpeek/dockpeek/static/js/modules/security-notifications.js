@@ -33,6 +33,7 @@ class SecurityNotifications {
    * Inject the bell icon into the header.
    */
   injectBellIcon() {
+    if (document.getElementById('security-bell-container')) return;
     const controlsContainer = document.querySelector('.controls-container');
     if (!controlsContainer) return;
 
