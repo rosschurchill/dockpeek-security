@@ -159,6 +159,22 @@ def extract_container_ports(container_attrs):
     return published_ports
 
 
+def extract_orchestration_labels(labels: dict) -> dict:
+    """Extract dockpeek.* orchestration labels from container labels."""
+    if not labels:
+        return {}
+    return {
+        'role': labels.get('dockpeek.role'),
+        'anchor': labels.get('dockpeek.anchor'),
+        'anchor_type': labels.get('dockpeek.anchor-type'),
+        'stack_override': labels.get('dockpeek.stack'),
+        'hidden': labels.get('dockpeek.hide', '').lower() == 'true',
+        'update_action': labels.get('dockpeek.update.action'),
+        'update_order': labels.get('dockpeek.update.order'),
+        'stop_before_anchor': labels.get('dockpeek.update.stop-before-anchor', '').lower() == 'true',
+    }
+
+
 def extract_labels_data(labels, tags_enable):
     stack_name = labels.get('com.docker.compose.project', '') or labels.get('com.docker.stack.namespace', '')
     source_url = labels.get('org.opencontainers.image.source') or labels.get('org.opencontainers.image.url', '')
@@ -207,6 +223,8 @@ def get_vulnerability_summary(client, image_name):
         if image_digest:
             cached = trivy_client.get_cached_result(image_digest)
             if cached:
+                if cached.error:
+                    return {'scan_status': 'failed', 'error': cached.error}
                 return {
                     'critical': cached.summary.critical,
                     'high': cached.summary.high,
@@ -318,6 +336,7 @@ def process_container(container, client, server_name, public_hostname, is_docker
 
         labels = container.attrs.get('Config', {}).get('Labels', {}) or {}
         labels_data = extract_labels_data(labels, tags_enable)
+        orchestration = extract_orchestration_labels(labels)
         traefik_routes = extract_traefik_routes(labels, traefik_enabled)
 
         published_ports_data = extract_container_ports(container.attrs)
@@ -372,6 +391,9 @@ def process_container(container, client, server_name, public_hostname, is_docker
         # Get cached version info (1 hour cache)
         version_info = get_version_info(image_name)
 
+        # Apply stack override from orchestration labels
+        stack = orchestration.get('stack_override') or labels_data['stack_name']
+
         container_info = {
             'server': server_name,
             'name': container.name,
@@ -380,7 +402,7 @@ def process_container(container, client, server_name, public_hostname, is_docker
             'started_at': start_time,
             'exit_code': exit_code,
             'image': image_name,
-            'stack': labels_data['stack_name'],
+            'stack': stack,
             'source_url': labels_data['source_url'],
             'custom_url': labels_data['custom_url'],
             'ports': port_map,
@@ -393,7 +415,8 @@ def process_container(container, client, server_name, public_hostname, is_docker
             'ip_addresses': ip_addresses,
             'security_skip': security_skip,
             'newer_version_available': version_info['newer_version_available'],
-            'latest_version': version_info['latest_version']
+            'latest_version': version_info['latest_version'],
+            'orchestration': orchestration
         }
 
         return container_info
@@ -472,6 +495,9 @@ def process_single_host_data(host, traefik_enabled, tags_enable, port_range_grou
                     is_docker_host, traefik_enabled, tags_enable, port_range_grouping_enabled,
                     request_hostname
                 )
+                # Skip containers marked as hidden via orchestration labels
+                if container_info.get('orchestration', {}).get('hidden'):
+                    continue
                 container_data.append(container_info)
             except Exception as container_error:
                 logger.warning(f"Error processing container {getattr(container, 'name', 'unknown')} on {server_name}: {container_error}")
@@ -483,6 +509,16 @@ def process_single_host_data(host, traefik_enabled, tags_enable, port_range_grou
                     'image': 'error-loading',
                     'ports': []
                 })
+
+        # Second pass: populate dependents list on anchor containers
+        for anchor_info in container_data:
+            if anchor_info.get('orchestration', {}).get('role') == 'anchor':
+                anchor_name = anchor_info['name']
+                dependents = [
+                    c['name'] for c in container_data
+                    if c.get('orchestration', {}).get('anchor') == anchor_name
+                ]
+                anchor_info['orchestration']['dependents'] = dependents
 
     except Exception as e:
         logger.error(f"Error processing host {host.get('name', 'unknown')}: {e}")

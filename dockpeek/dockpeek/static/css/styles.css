@@ -1191,6 +1191,15 @@ body.dark-mode .loader {
   }
 }
 
+/* UI/UX: Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Update indicator styles */
 .update-indicator:not(.hidden) {
   display: inline-flex;
@@ -1767,25 +1776,29 @@ body:not(.dark-mode) .stat-item {
   color: #e2e8f0 !important;
 }
 
-/* Security stat colors - matching vulnerability severity */
+/* Security stat colors - muted palette matching vuln badges */
 .stat-critical {
-  background: rgba(220, 38, 38, 0.25) !important;
+  background: rgba(127, 29, 29, 0.7) !important;
   color: #fca5a5 !important;
+  border: 1px solid rgba(239,68,68,0.25) !important;
 }
 
 .stat-high {
-  background: rgba(249, 115, 22, 0.25) !important;
-  color: #fdba74 !important;
+  background: rgba(120, 53, 15, 0.7) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245,158,11,0.25) !important;
 }
 
 .stat-medium {
-  background: rgba(234, 179, 8, 0.25) !important;
-  color: #fde047 !important;
+  background: rgba(22, 78, 99, 0.7) !important;
+  color: #67e8f9 !important;
+  border: 1px solid rgba(6,182,212,0.25) !important;
 }
 
 .stat-low {
-  background: rgba(34, 197, 94, 0.2) !important;
-  color: #86efac !important;
+  background: rgba(30, 58, 95, 0.7) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59,130,246,0.25) !important;
 }
 
 .stat-scanned {
@@ -1820,23 +1833,27 @@ body:not(.dark-mode) .stat-pill-total {
 
 /* Light mode security stat colors */
 body:not(.dark-mode) .stat-critical {
-  background: rgba(220, 38, 38, 0.15) !important;
-  color: #dc2626 !important;
+  background: rgba(127, 29, 29, 0.12) !important;
+  color: #9f1239 !important;
+  border: 1px solid rgba(127,29,29,0.2) !important;
 }
 
 body:not(.dark-mode) .stat-high {
-  background: rgba(249, 115, 22, 0.15) !important;
-  color: #ea580c !important;
+  background: rgba(120, 53, 15, 0.12) !important;
+  color: #92400e !important;
+  border: 1px solid rgba(120,53,15,0.2) !important;
 }
 
 body:not(.dark-mode) .stat-medium {
-  background: rgba(234, 179, 8, 0.15) !important;
-  color: #ca8a04 !important;
+  background: rgba(22, 78, 99, 0.12) !important;
+  color: #155e75 !important;
+  border: 1px solid rgba(22,78,99,0.2) !important;
 }
 
 body:not(.dark-mode) .stat-low {
-  background: rgba(34, 197, 94, 0.15) !important;
-  color: #16a34a !important;
+  background: rgba(30, 58, 95, 0.12) !important;
+  color: #1e3a5f !important;
+  border: 1px solid rgba(30,58,95,0.2) !important;
 }
 
 body:not(.dark-mode) .stat-scanned {
@@ -2407,40 +2424,34 @@ body.dark-mode .vuln-clickable:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: white;
-  border-radius: 3px;
+  line-height: 1;
+  transition: opacity 0.15s ease;
 }
 
-/* Active colors when count > 0 */
-.vuln-critical {
-  background-color: #e11d48;
-}
+/* Muted, professional severity colors — Fira Code for numeric precision */
+.vuln-critical { background: rgba(127, 29, 29, 0.85);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3);  font-family: "Fira Code", ui-monospace, monospace; }
+.vuln-high     { background: rgba(120, 53, 15, 0.85);  color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); font-family: "Fira Code", ui-monospace, monospace; }
+.vuln-medium   { background: rgba(22,  78, 99, 0.85);  color: #67e8f9; border: 1px solid rgba(6,182,212,0.3);  font-family: "Fira Code", ui-monospace, monospace; }
+.vuln-low      { background: rgba(30,  58, 95, 0.85);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); font-family: "Fira Code", ui-monospace, monospace; }
 
-.vuln-high {
-  background-color: #f97316;
-}
-
-.vuln-medium {
-  background-color: #eab308;
-}
-
-.vuln-low {
-  background-color: #06b6d4;
-}
-
-/* Zero count - dark muted boxes */
+/* Zero count - individual zero within a non-clean row */
 .vuln-badge.vuln-zero {
-  background-color: #374151;
-  color: #6b7280;
+  background: rgba(30, 41, 59, 0.6);
+  color: #64748b;
+  border: 1px solid rgba(100,116,139,0.2);
 }
 
-body.dark-mode .vuln-badge.vuln-zero {
-  background-color: #1f2937;
-  color: #4b5563;
+/* Clean state - all four zeros -> calm green */
+.vuln-badge.vuln-clean {
+  background: rgba(20, 83, 45, 0.75);
+  color: #86efac;
+  border: 1px solid rgba(34,197,94,0.25);
 }
 
 /* Scanning indicator */
@@ -3259,3 +3270,20 @@ body.dark-mode .vuln-item-new {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
 }
+
+/* Orchestration role badges */
+.orc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  font-size: 0.65rem;
+  opacity: 0.7;
+  cursor: help;
+  vertical-align: middle;
+}
+.orc-anchor    { color: #f59e0b; }  /* amber anchor */
+.orc-dependent { color: #94a3b8; }  /* muted grey arrow */
+
+/* Anchor update warning arrow */
+.update-indicator.orc-anchor-update { color: #f59e0b !important; }

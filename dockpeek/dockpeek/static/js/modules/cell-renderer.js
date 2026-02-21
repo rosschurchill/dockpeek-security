@@ -2,6 +2,22 @@ import { state } from './state.js';
 import { getRegistryUrl } from './registry-urls.js';
 import { escapeHtml, escapeAttr, sanitizeUrl, validateHttpUrl } from './utils/sanitize.js';
 
+function getOrchestrationBadge(container) {
+  const orc = container.orchestration;
+  if (!orc || !orc.role) return '';
+
+  if (orc.role === 'anchor') {
+    const count = orc.dependents ? orc.dependents.length : 0;
+    const tooltip = `Anchor (${orc.anchor_type}) — ${count} dependent${count !== 1 ? 's' : ''}`;
+    return `<span class="orc-badge orc-anchor" data-tooltip="${escapeAttr(tooltip)}">&#9875;</span>`;
+  }
+  if (orc.role === 'dependent') {
+    const tooltip = `Depends on: ${orc.anchor} (${orc.anchor_type})`;
+    return `<span class="orc-badge orc-dependent" data-tooltip="${escapeAttr(tooltip)}">&#x21B3;</span>`;
+  }
+  return '';
+}
+
 export function renderName(container, cell) {
   const nameSpan = cell.querySelector('[data-content="container-name"]');
 
@@ -9,12 +25,12 @@ export function renderName(container, cell) {
     const url = validateHttpUrl(container.custom_url);
     if (url) {
       const tooltipUrl = url.replace(/^https?:\/\//, '');
-      nameSpan.innerHTML = `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800" data-tooltip="${escapeAttr(tooltipUrl)}">${escapeHtml(container.name)}</a>`;
+      nameSpan.innerHTML = `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800" data-tooltip="${escapeAttr(tooltipUrl)}">${escapeHtml(container.name)}</a>${getOrchestrationBadge(container)}`;
     } else {
-      nameSpan.textContent = container.name;
+      nameSpan.innerHTML = `${escapeHtml(container.name)}${getOrchestrationBadge(container)}`;
     }
   } else {
-    nameSpan.textContent = container.name;
+    nameSpan.innerHTML = `${escapeHtml(container.name)}${getOrchestrationBadge(container)}`;
   }
 }
 
@@ -72,11 +88,20 @@ export function renderUpdateIndicator(container, clone) {
     indicator.classList.add('update-available-indicator');
     indicator.setAttribute('data-server', container.server);
     indicator.setAttribute('data-container', container.name);
-    indicator.setAttribute('data-tooltip', `Click to update ${container.name}`);
     indicator.style.cursor = 'pointer';
+
+    const orc = container.orchestration;
+    if (orc && orc.role === 'anchor' && orc.dependents && orc.dependents.length > 0) {
+      indicator.classList.add('orc-anchor-update');
+      indicator.setAttribute('data-tooltip', `\u26a0 Updating will affect ${orc.dependents.length} dependent container(s)`);
+    } else {
+      indicator.classList.remove('orc-anchor-update');
+      indicator.setAttribute('data-tooltip', `Click to update ${container.name}`);
+    }
   } else {
     indicator.classList.add('hidden');
     indicator.classList.remove('update-available-indicator');
+    indicator.classList.remove('orc-anchor-update');
     indicator.removeAttribute('data-server');
     indicator.removeAttribute('data-container');
     indicator.removeAttribute('data-tooltip');
@@ -430,6 +455,12 @@ export function renderSecurity(container, cell) {
     return;
   }
 
+  // Scan failed (timeout or inaccessible image)
+  if (vuln.scan_status === 'failed') {
+    cell.innerHTML = '<span class="status-none" data-tooltip="Scan failed - image may be inaccessible">&times;</span>';
+    return;
+  }
+
   // Build Docker Hub style traffic light badges (C H M L)
   const c = vuln.critical || 0;
   const h = vuln.high || 0;
@@ -441,13 +472,15 @@ export function renderSecurity(container, cell) {
     ? 'No vulnerabilities found'
     : `${c} Critical, ${h} High, ${m} Medium, ${l} Low`;
 
+  const allClean = total === 0;
+
   cell.innerHTML = `
     <div class="vuln-summary vuln-clickable" data-server="${escapeAttr(container.server)}" data-container="${escapeAttr(container.name)}" data-image="${escapeAttr(container.image)}" data-tooltip="${escapeAttr(tooltip)}">
       <div class="vuln-traffic-light">
-        <span class="vuln-badge vuln-critical${c === 0 ? ' vuln-zero' : ''}" title="Critical">${c}</span>
-        <span class="vuln-badge vuln-high${h === 0 ? ' vuln-zero' : ''}" title="High">${h}</span>
-        <span class="vuln-badge vuln-medium${m === 0 ? ' vuln-zero' : ''}" title="Medium">${m}</span>
-        <span class="vuln-badge vuln-low${l === 0 ? ' vuln-zero' : ''}" title="Low">${l}</span>
+        <span class="vuln-badge ${allClean ? 'vuln-clean' : ('vuln-critical' + (c === 0 ? ' vuln-zero' : ''))}" title="Critical">${allClean ? '✓' : c}</span>
+        <span class="vuln-badge ${allClean ? 'vuln-clean' : ('vuln-high'     + (h === 0 ? ' vuln-zero' : ''))}" title="High">${allClean ? '✓' : h}</span>
+        <span class="vuln-badge ${allClean ? 'vuln-clean' : ('vuln-medium'   + (m === 0 ? ' vuln-zero' : ''))}" title="Medium">${allClean ? '✓' : m}</span>
+        <span class="vuln-badge ${allClean ? 'vuln-clean' : ('vuln-low'      + (l === 0 ? ' vuln-zero' : ''))}" title="Low">${allClean ? '✓' : l}</span>
       </div>
     </div>
   `;

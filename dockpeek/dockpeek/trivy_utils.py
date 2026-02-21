@@ -14,6 +14,7 @@ import json
 import subprocess
 import requests
 import docker
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from threading import Lock, Thread
@@ -278,6 +279,8 @@ class TrivyClient:
         self._pending_lock = Lock()
         self._scanner_thread: Optional[Thread] = None
         self._scanner_running = False
+        self._max_workers = int(os.environ.get('TRIVY_SCAN_WORKERS', '3'))
+        self._executor: Optional[ThreadPoolExecutor] = None
 
     @property
     def is_enabled(self) -> bool:
@@ -419,6 +422,15 @@ class TrivyClient:
 
                 if exec_thread.is_alive():
                     logger.error(f"Trivy scan timed out for {image_name} after {self._timeout + 30}s")
+                    failed_result = ScanResult(
+                        image=image_name,
+                        image_digest=image_digest or f"failed:{image_name}",
+                        scan_timestamp=datetime.now(),
+                        scan_duration=self._timeout + 30.0,
+                        error="scan_timeout"
+                    )
+                    if image_digest:
+                        self._cache.set(image_digest, failed_result)
                     return None
 
                 if exec_error_holder[0]:
@@ -435,6 +447,15 @@ class TrivyClient:
                 if exit_code != 0:
                     error_msg = stderr.decode('utf-8') if stderr else 'Unknown error'
                     logger.error(f"Trivy scan failed for {image_name}: {error_msg[:500]}")
+                    failed_result = ScanResult(
+                        image=image_name,
+                        image_digest=image_digest or f"failed:{image_name}",
+                        scan_timestamp=datetime.now(),
+                        scan_duration=(datetime.now() - start_time).total_seconds(),
+                        error="scan_failed"
+                    )
+                    if image_digest:
+                        self._cache.set(image_digest, failed_result)
                     return None
 
                 output = stdout.decode('utf-8') if stdout else ''
@@ -570,39 +591,45 @@ class TrivyClient:
         logger.info("Trivy scan cache cleared")
 
     def _start_scanner_thread(self) -> None:
-        """Start the background scanner thread if not already running."""
+        """Start the background scanner thread and executor if not already running."""
         if self._scanner_thread is not None and self._scanner_thread.is_alive():
             return
 
         self._scanner_running = True
+        self._executor = ThreadPoolExecutor(max_workers=self._max_workers)
         self._scanner_thread = Thread(target=self._scanner_loop, daemon=True)
         self._scanner_thread.start()
-        logger.info("Background vulnerability scanner started")
+        logger.info(f"Background vulnerability scanner started with {self._max_workers} workers")
+
+    def _scan_worker(self, image_name: str, docker_client_info) -> None:
+        """Execute a single scan and remove from pending set when done."""
+        try:
+            self.scan_image(image_name, docker_client_info)
+        except Exception as e:
+            logger.error(f"Background scan failed for {image_name}: {e}")
+        finally:
+            with self._pending_lock:
+                self._pending_scans.discard(image_name)
 
     def _scanner_loop(self) -> None:
-        """Background thread loop that processes scan queue."""
+        """Dispatcher thread that reads from queue and submits to executor pool."""
+        futures = []
         while self._scanner_running:
             try:
-                # Wait for an item with timeout to allow checking _scanner_running
                 item = self._scan_queue.get(timeout=1.0)
                 image_name, docker_client_info = item
 
-                # Remove from pending set
-                with self._pending_lock:
-                    self._pending_scans.discard(image_name)
-
-                # Perform the scan
-                try:
-                    self.scan_image(image_name, docker_client_info)
-                except Exception as e:
-                    logger.error(f"Background scan failed for {image_name}: {e}")
-
+                future = self._executor.submit(self._scan_worker, image_name, docker_client_info)
+                futures.append(future)
                 self._scan_queue.task_done()
+
+                # Clean up completed futures periodically
+                futures = [f for f in futures if not f.done()]
 
             except Empty:
                 continue
             except Exception as e:
-                logger.error(f"Scanner thread error: {e}")
+                logger.error(f"Scanner dispatcher error: {e}")
 
     def queue_scan(self, image_name: str, docker_client=None) -> bool:
         """
@@ -665,8 +692,8 @@ class TrivyClient:
             if container.get('security_skip', False):
                 continue
 
-            # Skip if already has scan results or is skipped
-            if vuln_summary and vuln_summary.get('scan_status') in ('scanned', 'skipped'):
+            # Skip if already has scan results, is skipped, or previously failed
+            if vuln_summary and vuln_summary.get('scan_status') in ('scanned', 'skipped', 'failed'):
                 continue
 
             seen_images.add(image_name)
