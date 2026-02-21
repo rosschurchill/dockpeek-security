@@ -1,0 +1,16 @@
+services:
+  dockpeek-security:
+    image: registry.theshellnet.com/dockpeek-security:1.0.1
+    container_name: dockpeek-security
+    restart: unless-stopped
+    ports:
+      - "5051:8000"
+    environment:
+      - VERSION=1.0.1
+      - SECRET_KEY=your_secure_secret_key
+      - USERNAME=admin
+      - PASSWORD=admin
+      # Server name for UI (optional, auto-detected from Docker API if not set)
+      # - DOCKER_HOST_NAME=
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro  

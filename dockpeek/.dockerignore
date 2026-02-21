@@ -1,0 +1,73 @@
+# Git
+.git
+.gitignore
+
+# Environment / Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# IDE / Editor
+.vscode
+.idea
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archives / Binaries
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs / Dumps
+*.log
+*.sql
+*.sqlite
+
+# Dependencies / Build / Cache
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage/
+dist/
+build/
+.cache/
+.next/
+out/
+
+# Project specific
+.build/
+.develop/
+.ideas/
+.Releases/
+screenshots/
+
+# Documentation
+README.md
+LICENSE
+docs/
+*.md

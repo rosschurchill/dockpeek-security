@@ -1,0 +1,31 @@
+services:
+  dockpeek:
+    image: dockpeek/dockpeek:latest
+    container_name: dockpeek
+    restart: unless-stopped
+    ports:
+      - "3420:8000"
+    environment:
+      - SECRET_KEY=your_secure_secret_key
+      - USERNAME=admin
+      - PASSWORD=admin
+      
+      # --- Docker Host 1 (Local) ---
+      - DOCKER_HOST_1_URL=unix:///var/run/docker.sock # Local Docker socket
+      - DOCKER_HOST_1_NAME=Local Development          # Display name in UI
+      # DOCKER_HOST_1_PUBLIC_HOSTNAME is optional; uses host IP by default
+
+      # --- Docker Host 2 (Remote Server) ---
+      - DOCKER_HOST_2_URL=tcp://192.168.1.100:2375    # Remote socket proxy
+      - DOCKER_HOST_2_NAME=Production Server          # Display name in UI
+      - DOCKER_HOST_2_PUBLIC_HOSTNAME=server.local    # Optional: Custom hostname for links
+
+      # --- Docker Host 3 (Tailscale) ---
+      - DOCKER_HOST_3_URL=tcp://100.64.1.5:2375       # Tailscale IP
+      - DOCKER_HOST_3_NAME=Remote VPS                 # Display name in UI
+      - DOCKER_HOST_3_PUBLIC_HOSTNAME=vps.tailnet.ts.net # Optional: Tailscale FQDN
+
+      # --- Continue pattern for additional hosts (4, 5, etc.) ---
+    volumes:
+      # Required only if you are connecting to a local socket
+      - /var/run/docker.sock:/var/run/docker.sock:ro

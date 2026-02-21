@@ -1,0 +1,10 @@
+Flask
+Flask-Cors
+Flask-Login
+werkzeug
+docker
+packaging
+gunicorn
+gevent
+requests
+prometheus_client

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="api-prefix" content="{{ request.script_root }}">
+  <title>Dockpeek</title>
+  <link href="{{ url_for('static', filename='css/tailwindcss.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+</head>
+
+<body class="p-6 dark-mode">
+  {% if not config.DISABLE_AUTH %}
+  <style>
+    #logout-button {
+      display: block;
+    }
+  </style>
+  {% else %}
+  <style>
+    #logout-button {
+      display: none;
+    }
+  </style>
+  {% endif %}
+  <div class="container mx-auto bg-white rounded-lg shadow-xl">
+    <div class="container-top pt-8 pr-8 pl-8 pb-0">
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-4">
+          <h1 class="logo-title text-3xl font-bold">dockpeek</h1>
+          <div id="swarm-indicator"
+            class="hidden flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium swarm-indicator">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2M6.5 12.5L7.5 16.5L11.5 17.5L7.5 18.5L6.5 22.5L5.5 18.5L1.5 17.5L5.5 16.5L6.5 12.5M17.5 12.5L18.5 16.5L22.5 17.5L18.5 18.5L17.5 22.5L16.5 18.5L12.5 17.5L16.5 16.5L17.5 12.5Z" />
+            </svg>
+            <span>Swarm Mode</span>
+          </div>
+        </div>
+        <div class="flex space-x-4 items-center text-sm controls-container">
+          <div class="status-filter flex items-center space-x-3">
+            <label for="filter-running-checkbox" id="filter-running-label"
+              class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+              Running only
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="filter-running-checkbox" class="hidden">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <button id="refresh-button" class="header-btn" data-tooltip="Refresh Data">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M21 3V8M21 8H16M21 8L18 5.29168C16.4077 3.86656 14.3051 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.2832 21 19.8675 18.008 20.777 14"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button id="traefik-routes-button" class="header-btn" data-tooltip="View all Traefik routes">
+            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.74 4.23c-.84-1-1.57-2-1.71-2.22H12c-.14.21-.87 1.22-1.71 2.22-7.2 9.19 1.14 15.39 1.14 15.39l.57.41.57-.41s8.34-6.2 1.17-15.39zM12 19.48a3.48 3.48 0 01-.48-.35C9.4 17.44 6.68 13.25 10.22 7.63c.35-.55.65-1.07.92-1.55.25-.45.48-.86.68-1.21.2.35.43.76.68 1.21.27.48.57 1 .92 1.55 3.54 5.62.82 9.81-1.3 11.5a3.48 3.48 0 01-.12.35z"/>
+            </svg>
+            Traefik Routes
+          </button>
+          <button id="check-updates-button" class="header-btn">
+            <svg fill="currentColor" viewBox="2 2 52 52" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906 0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922 11.039 0 19.921 8.883 19.945 19.922.023 11.063-8.883 19.922-19.922 19.922m0-31.969c-.516 0-.89.188-1.36.656l-7.968 7.922c-.305.305-.445.727-.445 1.219 0 .96.726 1.688 1.687 1.688.492 0 .937-.188 1.242-.516l2.906-2.93 2.368-2.812-.188 4.945v12.21c0 1.032.727 1.759 1.758 1.759 1.008 0 1.758-.727 1.758-1.758V26.125l-.188-4.969 2.367 2.836 2.907 2.93c.304.351.726.515 1.242.515.96 0 1.71-.726 1.71-1.687 0-.492-.163-.914-.491-1.219l-7.922-7.922c-.469-.445-.867-.656-1.383-.656" />
+            </svg>
+            Check for updates
+          </button>
+          <a href="{{ url_for('auth.logout') }}" id="logout-button"
+            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 text-center font-medium">
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-4 relative flex items-center">
+        <input type="text" id="search-input"
+          placeholder="Search: name, image, stack, #tag, :port e.g. :3420, or :free 8000"
+          class="w-full p-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <div class="absolute right-18 flex items-center space-x-3">
+          <button id="clear-search-button" class="mr-3 text-gray-400 hover:text-gray-600 focus:outline-none hidden"
+            data-tooltip="Clear search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <label for="filter-updates-checkbox"
+            class="md:inline text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">            
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="filter-updates-checkbox" class="hidden">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div id="column-menu-button" class="column-menu-container">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            class="column-menu-svg">
+            <path
+              d="M8.97436 2.41026C8.25641 2.20513 7.23077 2 6.41026 2C5.58974 2 4.5641 2.20513 3.84615 2.41026C3.02564 2.51282 2.51282 3.23077 2.41026 3.94872C2.30769 5.48718 2 9.38462 2 12.0513C2 14.7179 2.30769 18.6154 2.41026 20.1538C2.51282 20.9744 3.02564 21.5897 3.74359 21.6923C4.46154 21.8974 5.48718 22 6.30769 22C7.1282 22 8.15385 21.7949 8.87179 21.6923C9.58974 21.4872 10.2051 20.8718 10.2051 20.1538C10.3077 18.6154 10.6154 14.7179 10.6154 12.0513C10.6154 9.38462 10.3077 5.48718 10.2051 3.94872C10.3077 3.23077 9.79487 2.51282 8.97436 2.41026Z"
+              fill="currentcolor"></path>
+            <path
+              d="M21.6923 3.94882C21.5897 3.12831 21.0769 2.51292 20.3589 2.41036C19.641 2.20523 18.6154 2.10266 17.7948 2.10266C16.9743 2.10266 15.8461 2.20523 15.1282 2.41036C14.4102 2.61548 13.7948 3.23087 13.7948 3.94882C13.6923 5.48728 13.3846 9.38472 13.3846 12.0514C13.3846 14.7181 13.6923 18.6155 13.7948 20.1539C13.8974 20.9745 14.4102 21.5898 15.1282 21.6924C15.8461 21.8975 16.8718 22.0001 17.6923 22.0001C18.5128 22.0001 19.5384 21.795 20.2564 21.6924C20.9743 21.4873 21.5897 20.8719 21.5897 20.1539C21.6923 18.6155 22 14.7181 22 12.0514C22 9.38472 21.7948 5.48728 21.6923 3.94882Z"
+              fill="currentcolor"></path>
+          </svg>
+          </svg>
+          <div id="column-menu" class="column-menu hidden">
+            <div id="column-list" class="column-list">
+              <div class="column-menu-item draggable" data-column="name">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-name">
+                  <span>Name</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-name" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="stack">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-stack">
+                  <span>Stack</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-stack" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="server">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-server">
+                  <span>Server</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-server" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="network">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-network">
+                  <span>Network</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-network">
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="ip">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-ip">
+                  <span>IP</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-ip">
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="ports">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-ports">
+                  <span>Ports</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-ports" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="traefik">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-traefik">
+                  <span>Traefik</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-traefik" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="image">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-image">
+                  <span>Image</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-image" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="tags">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-tags">
+                  <span>Tags</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-tags" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="security">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-security">
+                  <span>Security</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-security" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="column-menu-item draggable" data-column="status">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-status">
+                  <span>Status</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-status" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+
+
+              <div class="column-menu-item draggable" data-column="logs">
+                <div class="drag-handle">⋮⋮</div>
+                <label for="toggle-logs">
+                  <span>Logs</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-logs" checked>
+                    <span class="slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="column-menu-reset text-sm">
+              <a href="#" id="reset-columns-button" class="reset-columns-btn">
+                Reset all
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="active-tags-container" class="hidden mb-4 ml-2 flex flex-wrap gap-2"></div>
+
+      <div id="server-filter-container" class="mb-4 ml-2 flex flex-wrap gap-2"></div>
+
+      <!-- Unified Stats Bar: Container Stats + Security Dashboard -->
+      <div id="unified-stats-bar" class="unified-stats-bar mb-4 mx-2">
+        <div id="container-stats" class="hidden"></div>
+        <div id="stats-divider" class="stats-divider hidden"></div>
+        <div id="security-dashboard-container"></div>
+      </div>
+
+    </div>
+    <div id="container-table-wrapper" class="overflow-x-auto rounded-b-lg overflow-hidden pb-8">
+      <table id="main-table" class="min-w-full bg-white">
+        <thead class="main-table-header">
+          <tr>
+            <th
+              class="table-cell-name py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="name">
+              Name
+            </th>
+            <th
+              class=" table-cell-stack py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="stack">
+              Stack
+            </th>
+            <th
+              class="server-column table-cell-server py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header server-column"
+              data-sort-column="server">
+              Server
+            </th>
+            <th
+              class="table-cell-network py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="network">
+              Network
+            </th>
+            <th
+              class="table-cell-ip py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200"
+              data-sort-column="ip">
+              IP
+            </th>
+            <th
+              class="table-cell-ports py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="ports">
+              Ports
+            </th>
+            <th
+              class="traefik-column table-cell-traefik py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header traefik-column"
+              data-sort-column="traefik">
+              Traefik
+            </th>
+            <th
+              class="table-cell-image py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="image">
+              Image
+            </th>
+            <th
+              class="table-cell-tags py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 tags-column"
+              data-sort-column="tags">
+              Tags
+            </th>
+            <th
+              class="table-cell-security py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200"
+              data-sort-column="security">
+              Security
+            </th>
+            <th
+              class="table-cell-status py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 sortable-header"
+              data-sort-column="status">
+              Status
+            </th>
+            <th
+              class="table-cell-logs py-3 px-2 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 logs-column"
+              data-sort-column="logs">
+
+            </th>
+
+          </tr>
+        </thead>
+        <tbody id="container-rows">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="footer mx-auto py-3 flex justify-center items-center text-sm text-gray-500 p-4">
+    <div class="footer-section footer-center justify-center flex items-center flex-wrap space-x-9">
+
+      <div class="theme-switcher-wrapper">
+        <button id="theme-switcher" class="hover:text-blue-500 flex items-center space-x-1">
+          <span id="theme-icon"></span>
+        </button>
+        <div id="theme-menu" class="theme-menu">
+          <button data-theme="system" class="theme-menu-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+            <span>System</span>
+          </button>
+          <button data-theme="light" class="theme-menu-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <span>Light</span>
+          </button>
+          <button data-theme="dark" class="theme-menu-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor">
+              <path
+                d="M12 22C17.5228 22 22 17.5228 22 12C22 11.5373 21.3065 11.4608 21.0672 11.8568C19.9289 13.7406 17.8615 15 15.5 15C11.9101 15 9 12.0899 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+            </svg>
+            <span>Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <a href="https://github.com/dockpeek/dockpeek" target="_blank"
+        class="flex items-center gap-[0.6em] hover:text-blue-500">
+        <svg width="16" height="16" viewBox="0 0 97 96" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
+            fill="currentColor" />
+        </svg>
+        <span>GitHub</span>
+      </a>
+
+      <a href="https://buymeacoffee.com/dockpeek" target="_blank"
+        class="buycoffe group/cup flex items-center gap-[0.6em] hover:text-blue-500" data-tooltip="Buy me a coffee ☕">
+        <svg width="16" height="20" viewBox="0 0 884 1279" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="y-path group-hover/cup:fill-[#FFDD04]"
+            d="M472.623 590.836c-45.941 19.667-98.077 41.966-165.647 41.966a313.6 313.6 0 0 1-83.623-11.528l46.733 479.806a80.17 80.17 0 0 0 25.593 52.38 80.18 80.18 0 0 0 54.313 21.19s66.262 3.44 88.373 3.44c23.796 0 95.151-3.44 95.151-3.44 20.12 0 39.503-7.57 54.303-21.2a80.15 80.15 0 0 0 25.587-52.37l50.053-530.204c-22.368-7.639-44.943-12.715-70.391-12.715-44.014-.017-79.477 15.142-120.445 32.675"
+            fill="currentColor" />
+          <path fill="currentColor" class="group-hover/cup:fill-[#2b7fff]"
+            d="m879.567 341.849-7.037-35.497c-6.315-31.849-20.648-61.943-53.34-73.454-10.479-3.683-22.369-5.265-30.404-12.888-8.035-7.622-10.41-19.46-12.268-30.438-3.442-20.149-6.676-40.315-10.204-60.429-3.045-17.293-5.454-36.719-13.386-52.583-10.324-21.302-31.746-33.76-53.048-42.001a306 306 0 0 0-33.363-10.324C613.297 10.195 557.342 5.033 502.591 2.09a1376 1376 0 0 0-197.169 3.27c-48.797 4.439-100.193 9.807-146.564 26.687-16.948 6.177-34.413 13.593-47.3 26.687-15.813 16.088-20.975 40.969-9.43 61.031 8.208 14.247 22.111 24.313 36.857 30.972a299 299 0 0 0 59.844 19.478c57.297 12.664 116.642 17.636 175.178 19.753a1334 1334 0 0 0 194.433-6.35 1107 1107 0 0 0 47.817-6.314c18.738-2.874 30.765-27.376 25.242-44.445-6.608-20.406-24.365-28.321-44.444-25.241-2.96.464-5.902.894-8.862 1.324l-2.133.31q-10.204 1.29-20.407 2.409a1083 1083 0 0 1-42.259 3.717c-31.626 2.202-63.337 3.217-95.031 3.269-31.144 0-62.305-.878-93.38-2.925a1187 1187 0 0 1-42.431-3.545 1020 1020 0 0 1-19.219-2.168l-6.092-.774-1.324-.189-6.315-.912c-12.905-1.945-25.81-4.181-38.577-6.883a5.8 5.8 0 0 1 0-11.322h.241c11.064-2.357 22.213-4.37 33.397-6.125q5.593-.878 11.219-1.72h.103c7.003-.465 14.041-1.722 21.009-2.547A1336 1336 0 0 1 469.538 73.1c29.577.86 59.138 2.599 88.578 5.593a979 979 0 0 1 18.927 2.116c2.409.293 4.835.636 7.262.93l4.886.705a678 678 0 0 1 42.517 7.725c20.889 4.543 47.714 6.022 57.005 28.907 2.96 7.261 4.302 15.331 5.936 22.953l2.083 9.722q.081.262.12.533 7.382 34.413 14.78 68.826a12.6 12.6 0 0 1-2.006 9.871 12.6 12.6 0 0 1-8.593 5.254h-.138l-3.011.413-2.976.395q-14.144 1.842-28.322 3.442a1829 1829 0 0 1-55.938 5.506 1957 1957 0 0 1-111.55 6.074q-28.476.757-56.936.705a1976 1976 0 0 1-225.989-13.146c-8.122-.963-16.243-1.996-24.365-3.045 6.298.809-4.577-.62-6.779-.929a1447 1447 0 0 1-15.486-2.254c-17.327-2.599-34.55-5.799-51.843-8.604-20.906-3.441-40.9-1.72-59.81 8.604a87 87 0 0 0-36.012 37.338c-8.156 16.862-10.582 35.221-14.23 53.34s-9.326 37.614-7.175 56.214C5.1 420.431 33.165 453.054 73.53 460.35c37.975 6.882 76.156 12.457 114.44 17.206a2114.8 2114.8 0 0 0 489.988 2.822 25.81 25.81 0 0 1 21.003 7.339 25.8 25.8 0 0 1 7.491 20.948l-3.82 37.132-23.091 225.077a178841 178841 0 0 1-31.126 302.866c-2.203 21.84-2.512 44.36-6.659 65.94-6.539 33.93-29.509 54.77-63.027 62.39a439 439 0 0 1-93.569 10.94c-34.912.19-69.806-1.36-104.718-1.17-37.27.21-82.918-3.23-111.687-30.97-25.277-24.36-28.77-62.51-32.211-95.5q-6.882-65.504-13.645-130.989l-25.293-242.766-16.363-157.077c-.276-2.598-.551-5.162-.809-7.778-1.962-18.737-15.228-37.079-36.134-36.133-17.894.791-38.232 16.002-36.133 36.133l12.13 116.454 25.087 240.89a378681 378681 0 0 1 21.388 205.306c1.377 13.11 2.667 26.26 4.112 39.37 7.864 71.65 62.58 110.26 130.339 121.13 39.575 6.37 80.113 7.68 120.273 8.33 51.482.83 103.48 2.81 154.118-6.52 75.038-13.77 131.337-63.87 139.372-141.59 2.295-22.44 4.589-44.88 6.883-67.33q11.442-111.361 22.85-222.739l24.881-242.61 11.408-111.188a25.81 25.81 0 0 1 20.785-22.696c21.456-4.181 41.967-11.322 57.229-27.651 24.295-25.998 29.13-59.895 20.544-94.067M72.43 365.835c.327-.155-.275 2.649-.533 3.957-.052-1.979.051-3.734.533-3.957m2.082 16.105c.172-.121.688.568 1.222 1.394-.809-.758-1.325-1.325-1.24-1.394zm2.048 2.701c.74 1.256 1.135 2.048 0 0m4.112 3.338h.103c0 .121.19.241.258.362a2.7 2.7 0 0 0-.378-.362zm720.124-4.99c-7.708 7.33-19.323 10.737-30.8 12.441-128.704 19.099-259.283 28.769-389.399 24.502-93.121-3.183-185.261-13.525-277.453-26.55-9.034-1.273-18.824-2.925-25.036-9.584-11.7-12.561-5.953-37.854-2.908-53.03 2.788-13.903 8.122-32.434 24.657-34.413 25.81-3.028 55.783 7.863 81.318 11.735a1540 1540 0 0 0 92.57 11.27c132.18 12.045 266.58 10.169 398.175-7.45a1661 1661 0 0 0 71.699-11.236c21.216-3.803 44.737-10.943 57.556 11.029 8.792 14.97 9.962 34.998 8.603 51.912a28.94 28.94 0 0 1-8.999 19.374z" />
+        </svg>
+        <span>Support</span>
+      </a>
+
+      <span>
+        Dockpeek
+        {% if version and version != 'dev' %}
+        <a href="https://github.com/dockpeek/dockpeek/releases/tag/{{ version }}" target="_blank"
+          class="hover:text-blue-500">
+          {{ version }}
+        </a>
+        {% else %}
+        {{ version }}
+        {% endif %}
+      </span>
+
+      <a href="{{ url_for('main.export_json') }}" id="export-json-link" class="hover:text-blue-500"
+        data-tooltip="Export container data for currently selected server">
+        Export JSON
+      </a>
+
+      <button id="prune-images-button" class="hover:text-blue-500 flex items-center gap-[0.6em]"
+        data-tooltip="Remove unused Docker images">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        <span>Prune Images</span>
+        <span id="prune-badge"
+          class="hidden ml-1 px-2 py-0.5 text-xs bg-gray-700 text-gray-200 rounded-full prune-badge"></span>
+      </button>
+    </div>
+  </footer>
+
+
+  </div>
+  </div>
+
+  <template id="container-row-template">
+    <tr class="single-row-template">
+      <td class="py-3 px-4 border-b border-gray-200 font-medium container-name-cell" data-content="name">
+        <div class="container-name-wrapper inline-block items-center space-x-2">
+          <div class="name-wrapper">
+            <span data-content="container-name"></span>
+          </div>
+        </div>
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 text-gray-600 text-sm table-cell-stack" data-content="stack">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 text-gray-400 text-sm server-column" data-content="server">
+        <span data-content="server-name"></span>
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 text-sm" data-content="network">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 text-sm" data-content="ip">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200" data-content="ports">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 traefik-column" data-content="traefik-routes">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 table-cell-image">
+        <div class="flex items-center space-x-2">
+          <div class="image-wrapper">
+            <div class="image-wrapper-inline">
+              <code class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm" data-content="image"></code>
+            </div>
+
+            <span class="update-indicator hidden" data-content="update-indicator" data-server="" data-container="">
+              <svg fill="currentColor" width="20" height="20" viewBox="2 2 52 52" xmlns="http://www.w3.org/2000/svg"
+                class="text-orange-500 hover:text-orange-600">
+                <path
+                  d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906 0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922 11.039 0 19.921 8.883 19.945 19.922.023 11.063-8.883 19.922-19.922 19.922m0-31.969c-.516 0-.89.188-1.36.656l-7.968 7.922c-.305.305-.445.727-.445 1.219 0 .96.726 1.688 1.687 1.688.492 0 .937-.188 1.242-.516l2.906-2.93 2.368-2.812-.188 4.945v12.21c0 1.032.727 1.759 1.758 1.759 1.008 0 1.758-.727 1.758-1.758V26.125l-.188-4.969 2.367 2.836 2.907 2.93c.304.351.726.515 1.242.515.96 0 1.71-.726 1.71-1.687 0-.492-.163-.914-.491-1.219l-7.922-7.922c-.469-.445-.867-.656-1.383-.656" />
+              </svg>
+            </span>
+
+            <span class="new-version-indicator hidden" data-content="new-version-indicator" data-server="" data-container="" data-image="">
+              <svg fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                class="text-green-500 hover:text-green-600 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+              </svg>
+            </span>
+
+            <a href="#" class="registry-link hidden text-gray-500 hover:text-blue-600" data-content="registry-link"
+              target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                </path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </a>
+
+            <a href="#" class="source-link hidden text-gray-500 hover:text-blue-600" data-content="source-link"
+              target="_blank" rel="noopener noreferrer">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </a>
+
+          </div>
+        </div>
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 table-cell-tags" data-content="tags">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 table-cell-security" data-content="security">
+      </td>
+      <td class="py-3 px-4 border-b border-gray-200 table-cell-status" data-content="status">
+      </td>
+      <td class="py-3 px-2 border-b border-gray-200 table-cell-logs" data-content="logs">
+      </td>
+    </tr>
+  </template>
+
+  <div id="confirmation-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 id="modal-title" class="text-xl font-bold mb-4 text-gray-900">
+        Confirmation
+      </h2>
+      <div id="modal-message" class="text-gray-600 mb-6 text-left whitespace-pre-line">
+      </div>
+      <div class="flex justify-center space-x-4">
+        <button id="modal-cancel-button"
+          class="modal-cancel-button px-6 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">
+          Cancel
+        </button>
+        <button id="modal-confirm-button"
+          class="px-6 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="updates-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 id="updates-modal-title" class="text-lg font-semibold mb-4 text-gray-900 font-medium">
+        Updates Found
+      </h3>
+      <div id="updates-modal-message">
+        <ul id="updates-list" class="list-none text-left mb-4">
+        </ul>
+      </div>
+      <div class="flex justify-center space-x-4">
+        <button id="updates-modal-ok-button"
+          class="green-ok-button px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="progress-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 font-medium flex items-center justify-center">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span>Checking for Updates</span>
+      </h3>
+      <div class="progress-container">
+        <div class="progress-info">
+          <span id="progress-text">Starting update check...</span>
+          <span id="progress-counter">0 / 0</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div id="current-container" class="current-container">Preparing...</div>
+      </div>
+      <div class="flex justify-center space-x-4">
+        <button id="progress-cancel-button"
+          class="modal-cancel-button px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-medium">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="update-in-progress-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 font-medium flex items-center justify-center">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span>Updating <strong id="update-container-name" class="ml-1"></strong>...</span>
+      </h3>
+      <div class="text-gray-600 justify-center">
+        <p class="mb-4 text-center">This may take a <strong>few moments</strong>. The container will be
+          <strong>recreated</strong> with the new image.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="update-success-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="flex items-center justify-center text-lg font-semibold mb-4 font-medium">
+        <svg class="w-5 h-5 mr-2 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22,4 12,14.01 9,11.01"></polyline>
+        </svg>
+        Update Successful
+      </h3>
+      <div class="text-gray-600 mb-6 text-center">
+        <p id="update-success-message"></p>
+      </div>
+      <div class="flex justify-center space-x-4">
+        <button id="update-success-ok-button"
+          class="green-ok-button px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="update-error-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="flex items-center justify-center text-lg font-semibold mb-4 font-medium">
+        <svg class="w-5 h-5 mr-2 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        Update Failed
+      </h3>
+      <div class="text-gray-600 mb-6">
+        <div id="update-error-message" class="text-left leading-relaxed max-h-64 overflow-y-auto whitespace-pre-line">
+        </div>
+      </div>
+      <div class="flex justify-center space-x-4">
+        <button id="update-error-ok-button"
+          class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="prune-info-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 font-medium">
+        Unused Docker Images
+      </h3>
+      <div id="prune-info-message" class="text-gray-600 mb-6"></div>
+      <div class="flex justify-center space-x-4">
+        <button id="prune-cancel-button"
+          class="modal-cancel-button px-6 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">
+          Cancel
+        </button>
+        <button id="prune-confirm-button"
+          class="px-6 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">
+          Prune Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="prune-result-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="flex items-center justify-center text-lg font-semibold mb-4 font-medium">
+        <svg class="w-5 h-5 mr-2 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22,4 12,14.01 9,11.01"></polyline>
+        </svg>
+        Images Pruned Successfully
+      </h3>
+      <div id="prune-result-message" class="text-gray-600 mb-6"></div>
+      <div class="flex justify-center">
+        <button id="prune-result-ok-button"
+          class="green-ok-button px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Vulnerability Details Modal -->
+  <div id="vulnerability-modal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="vuln-modal-title" class="text-lg font-semibold text-gray-900">
+          Vulnerability Scan Results
+        </h3>
+        <button id="vuln-modal-close" class="text-gray-500 hover:text-gray-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div id="vuln-modal-summary" class="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center space-x-4 text-sm">
+          <span class="font-medium text-gray-700">Image:</span>
+          <code id="vuln-modal-image" class="bg-gray-200 px-2 py-1 rounded text-xs"></code>
+        </div>
+        <div id="vuln-modal-counts" class="flex items-center space-x-3 mt-2">
+        </div>
+      </div>
+
+      <div id="vuln-modal-list" class="vuln-list max-h-96 overflow-y-auto">
+        <div class="text-center text-gray-500 py-8">Loading vulnerabilities...</div>
+      </div>
+
+      <div class="flex justify-between items-center mt-4 pt-4 border-t">
+        <button id="vuln-rescan-button" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center space-x-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 3V8M21 8H16M21 8L18 5.29168C16.4077 3.86656 14.3051 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.2832 21 19.8675 18.008 20.777 14" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Rescan</span>
+        </button>
+        <button id="vuln-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan In Progress Modal -->
+  <div id="scan-progress-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 font-medium flex items-center justify-center">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Scanning for Vulnerabilities</span>
+      </h3>
+      <div class="text-gray-600 text-center">
+        <p class="mb-2">Analyzing image: <code id="scan-progress-image" class="bg-gray-100 px-2 py-1 rounded text-sm"></code></p>
+        <p class="text-sm text-gray-500">This may take a moment...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version Selection Modal -->
+  <div id="version-modal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Available Versions
+        </h3>
+        <button id="version-modal-close" class="text-gray-500 hover:text-gray-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center space-x-4 text-sm">
+          <span class="font-medium text-gray-700">Image:</span>
+          <code id="version-modal-image" class="bg-gray-200 px-2 py-1 rounded text-xs"></code>
+        </div>
+        <div class="flex items-center space-x-4 text-sm mt-2">
+          <span class="font-medium text-gray-700">Current:</span>
+          <code id="version-modal-current" class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"></code>
+        </div>
+      </div>
+
+      <div id="version-list" class="max-h-96 overflow-y-auto">
+        <div class="text-center text-gray-500 py-8">Loading versions...</div>
+      </div>
+
+      <div class="flex justify-end mt-4 pt-4 border-t">
+        <button id="version-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Traefik Routes Modal -->
+  <div id="traefik-routes-modal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+          All Traefik Routes
+        </h3>
+        <button id="traefik-modal-close" class="text-gray-500 hover:text-gray-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div id="traefik-routes-list" class="max-h-96 overflow-y-auto">
+        <div class="text-center text-gray-500 py-8">Loading routes...</div>
+      </div>
+
+      <div class="flex justify-end mt-4 pt-4 border-t">
+        <button id="traefik-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/static/js/app.js?v=20260119"></script>
+</body>
+
+</html>

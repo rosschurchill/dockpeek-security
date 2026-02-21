@@ -1,0 +1,63 @@
+# ========================
+# SECRETS - NEVER COMMIT
+# ========================
+.docker-registry
+.portainer-api
+.env
+.env.*
+*.env
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS
+.DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Node
+node_modules/
+package-lock.json
+
+# Docker build artifacts
+*.tar
+*.tar.gz
+
+# Claude AI workspace files
+.claude/
+memory/
+
+# Internal planning / session docs
+NEXT_STEPS.md
+ORCHESTRATION_LABELS.md
+PROJECT_SCOPE.md
+
+# Temp / local dev notes
+*.tmp
+*.bak

@@ -1,0 +1,55 @@
+# Environment / Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archives / Binaries
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs / Dumps
+*.log
+*.sql
+*.sqlite
+
+# Dependencies / Build
+node_modules/
+dist/
+build/
+*.css.map
+
+# Project specific
+.build/
+.develop/
+.ideas/
+.Releases/
+docker-compose-dev*.yml
+
+# Cache
+.cache/
+.npm/
