@@ -1290,7 +1290,8 @@ body.dark-mode .table-cell-image code {
   border: 1px solid #e2e8f0;
   font-weight: 500;
   font-size: 0.8125rem;
-  line-height: 1.25rem;
+  height: 36px !important;
+  line-height: 1;
   white-space: nowrap;
   transition: all 0.2s ease;
   cursor: pointer;
