@@ -1,16 +1,50 @@
 services:
-  dockpeek-security:
-    image: registry.theshellnet.com/dockpeek-security:1.2.0
+  dockpeek:
+    image: registry.theshellnet.com/dockpeek-security:1.2.2
     container_name: dockpeek-security
     restart: unless-stopped
     ports:
       - "5051:8000"
     environment:
-      - VERSION=1.2.0
-      - SECRET_KEY=your_secure_secret_key
-      - USERNAME=admin
-      - PASSWORD=admin
-      # Server name for UI (optional, auto-detected from Docker API if not set)
-      # - DOCKER_HOST_NAME=
+      - VERSION=1.2.2
+      - SECRET_KEY=your_secure_secret_key_change_this
+      - USERNAME=${USERNAME:-admin}
+      - PASSWORD=${PASSWORD:-changeme}
+      - TRIVY_SERVER_URL=http://trivy:4954
+      - TRIVY_CONTAINER_NAME=trivy
+      - BACKGROUND_REFRESH_ENABLED=true
+      - BACKGROUND_REFRESH_INTERVAL=300
+      - VERSION_CHECK_INTERVAL=3600
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro  
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - trivy
+    networks:
+      - dockpeek-net
+      # Uncomment to expose via Traefik (requires traefik-network to exist)
+      # - traefik-network
+
+  trivy:
+    image: aquasec/trivy:0.58.0
+    container_name: trivy
+    restart: unless-stopped
+    command: server --listen 0.0.0.0:4954
+    ports:
+      - "4954:4954"
+    volumes:
+      - trivy-cache:/root/.cache/trivy
+      # Mount Docker config for private registry auth:
+      # - /root/.docker/config.json:/root/.docker/config.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - dockpeek-net
+
+networks:
+  dockpeek-net:
+    driver: bridge
+  # traefik-network:
+  #   external: true
+  #   name: traefik-network
+
+volumes:
+  trivy-cache:
