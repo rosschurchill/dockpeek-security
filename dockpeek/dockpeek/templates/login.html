@@ -2,35 +2,221 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dockpeek Login</title>
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
-    <link href="{{ url_for('static', filename='css/tailwindcss.css') }}" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DockPeek Security — Sign In</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(249, 115, 22, 0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 85%, rgba(59, 130, 246, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+      padding: 40px 36px;
+      background: rgba(22, 27, 34, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow:
+        0 32px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+
+    /* ── Brand ─────────────────────────────────────────────── */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      filter: drop-shadow(0 4px 12px rgba(249, 115, 22, 0.3));
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: -0.4px;
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #fb923c;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Error ──────────────────────────────────────────────── */
+    .error-msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      color: #f87171;
+      margin-bottom: 22px;
+    }
+
+    /* ── Form ───────────────────────────────────────────────── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 7px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #f0f6fc;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: rgba(249, 115, 22, 0.55);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-login {
+      width: 100%;
+      margin-top: 8px;
+      padding: 13px;
+      background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.35);
+      transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-login:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(249, 115, 22, 0.45);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 28px 0 20px;
+    }
+
+    .footer-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.18);
+    }
+  </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center dark-mode">
-    <div class="login-box shadow-xl rounded-lg p-8 max-w-md w-full">
-        <div class="flex justify-center mb-6">
-            <img src="{{ url_for('static', filename='images/logo_2.svg') }}" alt="Logo" class="w-20 h-20 mb-6">
-        </div>
-        <h2 class="text-2xl font-bold text-center mb-6">Log in to Dockpeek</h2>
-        <form method="POST" action="{{ url_for('auth.login') }}">
-            {% if error %}
-            <p class="text-red-500 text-center mb-4">{{ error }}</p>
-            {% endif %}
-            <div class="mb-4">
-                <label for="username" class="block text-sm font-medium mb-1">Username</label>
-                <input type="text" id="username" name="username" autocomplete="username" required class="w-full p-3 border rounded-lg">
-            </div>
-            <div class="mb-6">
-                <label for="password" class="block text-sm font-medium mb-1">Password</label>
-                <input type="password" id="password" name="password" autocomplete="current-password" required class="w-full p-3 border rounded-lg">
-            </div>
-            <button type="submit"
-                class="w-full text-white py-3 rounded-lg transition duration-150 ease-in-out">Login</button>
-        </form>
+<body>
+  <div class="login-card">
+
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/logo_2.svg') }}" alt="DockPeek Logo" class="brand-logo">
+      <div class="brand-name">DockPeek</div>
+      <div class="brand-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Security Edition
+      </div>
     </div>
+
+    {% if error %}
+    <div class="error-msg">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="admin" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-login">Sign In</button>
+    </form>
+
+    <div class="divider"></div>
+
+    <div class="footer-note">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Authenticated access only
+    </div>
+
+  </div>
 </body>
 
 </html>
