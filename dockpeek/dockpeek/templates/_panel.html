@@ -13,6 +13,18 @@
       </div>
       <div class="panel-header-right">
         <span class="panel-running-badge" data-content="running-badge"></span>
+        <span class="panel-update-badge" data-content="update-indicator" style="display:none">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/>
+          </svg>
+          Update
+        </span>
+        <a class="panel-registry-link" data-content="registry-link" href="#" target="_blank" rel="noopener" data-tooltip="Open in registry" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
         <button class="panel-logs-btn logs-button" data-content="logs-trigger" data-tooltip="View logs">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
@@ -37,10 +49,6 @@
     </div>
   </div>
   <div class="panel-status-section" data-content="status">
-    <div class="panel-status-label">
-      <span class="panel-status-dot"></span>
-      <span class="panel-status-text" data-content="status-text">—</span>
-    </div>
     <div class="panel-cve-display" data-content="cve-status"></div>
   </div>
 </div>

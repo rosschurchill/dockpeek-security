@@ -1,4 +1,5 @@
 import * as CellRenderer from './cell-renderer.js';
+import { getRegistryUrl } from './registry-urls.js';
 import { renderStatus } from './status-renderer.js';
 import { state } from './state.js';
 import { escapeHtml } from './utils/sanitize.js';
@@ -49,9 +50,30 @@ export class TableRenderer {
 
     // Image name (trim tag)
     const imageEl = clone.querySelector('[data-content="image-name"]');
+    const rawImage = container.image || container.Image || '';
     if (imageEl) {
-      const img = container.image || container.Image || '';
-      imageEl.textContent = img.split(':')[0] || img;
+      imageEl.textContent = rawImage.split(':')[0] || rawImage;
+    }
+
+    // Panel icon — try Dashboard Icons CDN, fallback to generic SVG
+    const iconEl = clone.querySelector('[data-content="panel-icon"]');
+    if (iconEl) {
+      const iconName = _resolveIconName(rawImage, container.name || '');
+      const fallbackSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+        <rect x="2" y="2" width="20" height="20" rx="5"/><path d="M8 12h8M12 8v8"/>
+      </svg>`;
+      if (iconName) {
+        const img = document.createElement('img');
+        img.src = `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@main/png/${iconName}.png`;
+        img.width = 28;
+        img.height = 28;
+        img.style.cssText = 'border-radius:6px;object-fit:contain;';
+        img.onerror = () => { iconEl.innerHTML = fallbackSvg; };
+        iconEl.innerHTML = '';
+        iconEl.appendChild(img);
+      } else {
+        iconEl.innerHTML = fallbackSvg;
+      }
     }
 
     // Logs button wiring
@@ -116,11 +138,13 @@ export class TableRenderer {
       dotEl.classList.add(`status-dot-${status}`);
     }
 
-    // CVE display in status box — traffic lights or green clean shield
+    // CVE display in status box — traffic lights, clean shield, or pending
     const cveEl = clone.querySelector('[data-content="cve-status"]');
     if (cveEl) {
-      const v = container.vulnerabilities;
-      if (v) {
+      const v = container.vulnerability_summary;
+      const scanStatus = v?.scan_status;
+
+      if (scanStatus === 'scanned') {
         const total = (v.critical || 0) + (v.high || 0) + (v.medium || 0) + (v.low || 0);
         if (total === 0) {
           panel.classList.add('cve-clean');
@@ -145,7 +169,33 @@ export class TableRenderer {
           else                     panel.classList.add('cve-sev-low');
         }
       }
-      // if v is null/undefined (not yet scanned), leave the box empty
+      // not_scanned / skipped / failed / error / null — leave box empty
+    }
+
+    // Update badge — show only when truly available (bypass hidden class specificity issue)
+    const updateBadgeEl = clone.querySelector('[data-content="update-indicator"]');
+    if (updateBadgeEl) {
+      if (container.update_available) {
+        updateBadgeEl.style.display = '';
+        updateBadgeEl.classList.add('update-available-indicator');
+        updateBadgeEl.setAttribute('data-server', container.server || '');
+        updateBadgeEl.setAttribute('data-container', container.name || '');
+        updateBadgeEl.setAttribute('data-tooltip', `Click to update ${container.name}`);
+      } else {
+        updateBadgeEl.style.display = 'none';
+      }
+    }
+
+    // Registry link — show only when URL resolves
+    const registryLinkEl = clone.querySelector('[data-content="registry-link"]');
+    if (registryLinkEl) {
+      const url = getRegistryUrl(container.image || container.Image || '');
+      if (url) {
+        registryLinkEl.href = url;
+        registryLinkEl.style.display = '';
+      } else {
+        registryLinkEl.style.display = 'none';
+      }
     }
 
     return clone;
@@ -220,4 +270,84 @@ export class TableRenderer {
     div.appendChild(cell);
     return div;
   }
+}
+
+/**
+ * Resolve a dashboard-icons slug from an image name + container name.
+ * Returns a slug string (may still 404 if icon doesn't exist — onerror handles that).
+ */
+function _resolveIconName(imageName, containerName) {
+  const withoutTag = imageName.split(':')[0];
+  const parts = withoutTag.split('/');
+  let slug = parts[parts.length - 1] || '';
+
+  if (!slug || ['app', 'server', 'backend', 'frontend'].includes(slug)) {
+    slug = containerName;
+  }
+
+  slug = slug.toLowerCase().replace(/_/g, '-');
+
+  const remaps = {
+    'alertmanager':   'alertmanager',
+    'prometheus':     'prometheus',
+    'grafana':        'grafana',
+    'loki':           'loki',
+    'promtail':       'promtail',
+    'cadvisor':       'cadvisor',
+    'portainer':      'portainer',
+    'traefik':        'traefik',
+    'crowdsec':       'crowdsec',
+    'authelia':       'authelia',
+    'vaultwarden':    'vaultwarden',
+    'vault':          'vault',
+    'sonarr':         'sonarr',
+    'radarr':         'radarr',
+    'bazarr':         'bazarr',
+    'prowlarr':       'prowlarr',
+    'lidarr':         'lidarr',
+    'readarr':        'readarr',
+    'overseerr':      'overseerr',
+    'jellyfin':       'jellyfin',
+    'plex':           'plex',
+    'emby':           'emby',
+    'navidrome':      'navidrome',
+    'nextcloud':      'nextcloud',
+    'nginx':          'nginx',
+    'unifi':          'unifi',
+    'homeassistant':  'home-assistant',
+    'home-assistant': 'home-assistant',
+    'mosquitto':      'mosquitto',
+    'node-red':       'node-red',
+    'redis':          'redis',
+    'postgres':       'postgresql',
+    'postgresql':     'postgresql',
+    'mariadb':        'mariadb',
+    'mysql':          'mysql',
+    'mongodb':        'mongodb',
+    'influxdb':       'influxdb',
+    'diun':           'diun',
+    'watchtower':     'watchtower',
+    'uptime-kuma':    'uptime-kuma',
+    'heimdall':       'heimdall',
+    'homer':          'homer',
+    'duplicati':      'duplicati',
+    'gitea':          'gitea',
+    'gitlab':         'gitlab',
+    'syncthing':      'syncthing',
+    'cloudflared':    'cloudflare',
+    'pihole':         'pi-hole',
+    'adguard':        'adguard-home',
+    'paperless':      'paperless-ngx',
+    'mealie':         'mealie',
+    'immich':         'immich',
+    'kavita':         'kavita',
+    'jackett':        'jackett',
+    'qbittorrent':    'qbittorrent',
+    'transmission':   'transmission',
+    'deluge':         'deluge',
+    'sabnzbd':        'sabnzbd',
+    'wazuh':          'wazuh',
+  };
+
+  return remaps[slug] ?? slug;
 }
