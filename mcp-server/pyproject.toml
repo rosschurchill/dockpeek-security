@@ -1,0 +1,20 @@
+[project]
+name = "dockpeek-mcp"
+version = "1.0.0"
+description = "MCP server for DockPeek Security - Docker container CVE intelligence for SOC operations"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.2.0",
+    "requests>=2.31.0",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+dockpeek-mcp = "dockpeek_mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
