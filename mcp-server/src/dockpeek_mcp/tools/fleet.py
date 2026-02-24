@@ -1,7 +1,7 @@
 """Fleet overview tools — container listing and filtering."""
 from __future__ import annotations
 
-from dockpeek_mcp.server import mcp, client
+from dockpeek_mcp.app import mcp, client
 
 
 @mcp.tool()
