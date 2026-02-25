@@ -195,6 +195,61 @@ def dockpeek_list_image_versions(image: str, limit: int = 20) -> str:
 
 
 @mcp.tool()
+def dockpeek_update_container(server_name: str, container_name: str, new_image: str = "") -> str:
+    """Trigger an update (restart/redeploy) for a specific container.
+
+    WRITE OPERATION — this will stop the running container and recreate it with
+    the specified (or current) image. When Portainer integration is configured on
+    the DockPeek instance, the update goes through the Portainer stack API so the
+    container stays within its compose stack. Without Portainer, the raw Docker API
+    is used as a fallback.
+
+    Args:
+        server_name: Docker server name hosting the container (e.g. 'TVSP01').
+        container_name: Exact container name to update.
+        new_image: Optional new image tag to upgrade to, e.g. 'linuxserver/sonarr:4.0.17'.
+                   Leave empty to restart with the current (potentially freshly-pulled) image.
+
+    Use this after confirming that a container has an available update (via
+    dockpeek_check_container_updates or dockpeek_check_outdated_containers).
+    For version upgrades, first check available versions with
+    dockpeek_list_image_versions() to choose an appropriate target tag.
+    """
+    try:
+        body: dict = {
+            "server_name": server_name,
+            "container_name": container_name,
+        }
+        if new_image:
+            body["new_image"] = new_image
+
+        data = client.post("/update-container", json=body)
+    except Exception as e:
+        return f"Error updating container '{container_name}': {e}"
+
+    if data.get("error"):
+        return f"Update failed for '{container_name}': {data['error']}"
+
+    status = data.get("status", "unknown")
+    message = data.get("message", "")
+
+    lines = [f"Container Update: {container_name} [{server_name}]"]
+    lines.append(f"  Status:  {status.upper()}")
+    if message:
+        lines.append(f"  Detail:  {message}")
+    if new_image:
+        lines.append(f"  Image:   {new_image}")
+
+    # Check Portainer path
+    if "portainer" in message.lower() or "stack" in message.lower():
+        lines.append("  Method:  Portainer stack redeploy (in-stack)")
+    else:
+        lines.append("  Method:  Docker API direct")
+
+    return "\n".join(lines)
+
+
+@mcp.tool()
 def dockpeek_check_container_updates(server_filter: str = "all") -> str:
     """Check whether containers are running stale local images (same tag, new digest available).
 

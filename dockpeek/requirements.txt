@@ -8,3 +8,8 @@ gunicorn
 gevent
 requests
 prometheus_client
+
+# CVE fixes — transitive dep pins
+pip>=25.3               # CVE-2025-8869, CVE-2026-1703
+jaraco.context>=6.1.0   # CVE-2026-23949
+wheel>=0.46.2           # CVE-2026-24049

@@ -323,6 +323,38 @@ def update_container_route():
             return jsonify({"error": str(e)}), 500
 
 
+@main_bp.route("/api/portainer/status", methods=["GET"])
+@conditional_login_required
+def portainer_status():
+    """Return Portainer integration status.
+
+    Response shape::
+
+        {
+            "configured": true,
+            "url": "https://10.0.0.200:9443",
+            "connected": true
+        }
+
+    ``configured`` is True when PORTAINER_URL and PORTAINER_API_KEY are both set.
+    ``connected`` is True when a live GET /api/status call to Portainer succeeds.
+    ``url`` is omitted when not configured.
+    """
+    from .portainer_client import PortainerClient
+
+    configured = PortainerClient.is_configured()
+    if not configured:
+        return jsonify({"configured": False, "connected": False}), 200
+
+    client = PortainerClient()
+    connected = client.check_connection()
+    return jsonify({
+        "configured": True,
+        "url": client.url,
+        "connected": connected,
+    }), 200
+
+
 @main_bp.route("/api/repair-image-names", methods=["POST"])
 @conditional_login_required
 def repair_image_names():

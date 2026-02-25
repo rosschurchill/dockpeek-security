@@ -1,4 +1,5 @@
 from .update import update_checker
+from .portainer_client import PortainerClient
 import logging
 import time
 import re
@@ -133,6 +134,7 @@ class ContainerUpdater:
         }
         self.original_timeout = None
         self.update_checker = update_checker
+        self._portainer = PortainerClient() if PortainerClient.is_configured() else None
         
     def __enter__(self):
         self.original_timeout = getattr(self.client.api, 'timeout', None)
@@ -149,6 +151,56 @@ class ContainerUpdater:
             except AttributeError:
                 pass
     
+    def update_via_portainer(self, container_name: str, new_image: str = None) -> Dict[str, Any]:
+        """Attempt a stack-aware update through Portainer.
+
+        Returns a result dict with ``success`` (bool) and either ``message``
+        or ``error``.  When the container is not part of any Portainer stack
+        the error value starts with "Container not in a Portainer stack" so
+        the caller knows to fall back to the raw Docker path.
+        """
+        stack_info = self._portainer.get_container_stack(container_name)
+        if not stack_info:
+            return {
+                "success": False,
+                "error": "Container not in a Portainer stack, falling back to Docker API",
+            }
+
+        stack_id = stack_info["stack_id"]
+        stack_name = stack_info.get("stack_name", stack_id)
+        service_name = stack_info.get("service_name")
+
+        # If get_container_stack didn't resolve the service name, ask explicitly.
+        if not service_name:
+            service_name = self._portainer.find_service_for_container(stack_id, container_name)
+
+        logger.info(
+            "[%s] Portainer path: container='%s' stack='%s' (id=%s) service='%s'",
+            self.server_name, container_name, stack_name, stack_id, service_name,
+        )
+
+        if new_image and service_name:
+            result = self._portainer.redeploy_stack(
+                stack_id, image_updates={service_name: new_image}
+            )
+        else:
+            # No image change — just redeploy to restart on the current (possibly pulled) image.
+            if new_image and not service_name:
+                logger.warning(
+                    "[%s] Portainer: service name unknown for '%s', redeploying without image update",
+                    self.server_name, container_name,
+                )
+            result = self._portainer.redeploy_stack(stack_id)
+
+        if result.get("success"):
+            msg = f"Container '{container_name}' redeployed via Portainer stack '{stack_name}'."
+            if new_image:
+                msg = f"Container '{container_name}' updated to '{new_image}' via Portainer stack '{stack_name}'."
+            logger.info("[%s] %s", self.server_name, msg)
+            return {"status": "success", "message": msg}
+
+        return {"success": False, "error": result.get("error", "Portainer redeploy failed")}
+
     def _get_dependent_containers(self, container):
         dependent = []
         try:
@@ -177,6 +229,21 @@ class ContainerUpdater:
 
     def _do_update(self, container_name: str, force: bool = False, new_image: str = None) -> Dict[str, Any]:
         logger.info(f"[{self.server_name}] Starting update for: {container_name} (force={force}, new_image={new_image})")
+
+        # Try Portainer first when it is configured.  This handles compose-managed
+        # containers correctly (preserves stack env, networking, and service config).
+        if self._portainer:
+            logger.info(f"[{self.server_name}] Portainer is configured — attempting stack-aware update")
+            portainer_result = self.update_via_portainer(container_name, new_image)
+            if portainer_result.get("success") or portainer_result.get("status") == "success":
+                return portainer_result
+            err = portainer_result.get("error", "")
+            if "not in a Portainer stack" in err:
+                logger.info(f"[{self.server_name}] {err} for '{container_name}'")
+            else:
+                logger.warning(f"[{self.server_name}] Portainer update failed for '{container_name}': {err} — falling back to Docker API")
+        else:
+            logger.info(f"[{self.server_name}] Portainer not configured — using Docker API directly")
 
         container = self._get_container(container_name)
 

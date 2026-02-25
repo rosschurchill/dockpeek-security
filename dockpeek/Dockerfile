@@ -29,7 +29,10 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip/wheel/setuptools first so base-image versions are replaced
+# in this layer (prevents Trivy detecting stale versions from lower layers).
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY gunicorn.conf.py .
 
