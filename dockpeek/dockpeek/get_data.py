@@ -169,6 +169,7 @@ def extract_orchestration_labels(labels: dict) -> dict:
         'anchor_type': labels.get('dockpeek.anchor-type'),
         'stack_override': labels.get('dockpeek.stack'),
         'hidden': labels.get('dockpeek.hide', '').lower() == 'true',
+        'auto_update': labels.get('dockpeek.update.auto', '').lower() == 'true',
         'update_action': labels.get('dockpeek.update.action'),
         'update_order': labels.get('dockpeek.update.order'),
         'stop_before_anchor': labels.get('dockpeek.update.stop-before-anchor', '').lower() == 'true',

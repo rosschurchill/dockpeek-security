@@ -30,6 +30,7 @@ class BackgroundScheduler:
     def __init__(self):
         self._refresh_thread: Optional[threading.Thread] = None
         self._version_thread: Optional[threading.Thread] = None
+        self._auto_update_thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._scheduler_lock_fd = None
         self._is_scheduler_owner = False
@@ -84,7 +85,12 @@ class BackgroundScheduler:
             # This worker will still read from shared file-based caches
             return
 
-        logger.info(f"Starting background scheduler (refresh: {self.refresh_interval}s, version: {self.version_interval}s)")
+        from .auto_updater import auto_updater
+        logger.info(
+            f"Starting background scheduler (refresh: {self.refresh_interval}s, "
+            f"version: {self.version_interval}s, "
+            f"auto-update: {auto_updater.interval}s)"
+        )
 
         # Start CVE refresh thread
         self._refresh_thread = threading.Thread(target=self._refresh_loop, daemon=True, name="cve-refresh")
@@ -93,6 +99,16 @@ class BackgroundScheduler:
         # Start version check thread
         self._version_thread = threading.Thread(target=self._version_loop, daemon=True, name="version-refresh")
         self._version_thread.start()
+
+        # Start auto-update thread (only if auto-updater is enabled)
+        if auto_updater.enabled:
+            auto_updater._app = self._app
+            self._auto_update_thread = threading.Thread(
+                target=self._auto_update_loop, daemon=True, name="auto-update"
+            )
+            self._auto_update_thread.start()
+        else:
+            logger.info("Auto-updater disabled, skipping thread")
 
     def stop(self):
         """Stop background threads and release lock."""
@@ -139,6 +155,27 @@ class BackgroundScheduler:
 
             # Wait for next interval
             self._stop_event.wait(self.version_interval)
+
+    def _auto_update_loop(self):
+        """Background loop for automatic container updates."""
+        from .auto_updater import auto_updater
+        # Initial delay — let the app fully start and version checks populate
+        time.sleep(60)
+
+        while not self._stop_event.is_set():
+            try:
+                logger.debug("Background auto-update check starting...")
+                summary = auto_updater.check_and_update()
+                logger.debug(
+                    "Background auto-update check complete: updated=%d skipped=%d failed=%d",
+                    summary.get('updated', 0),
+                    summary.get('skipped', 0),
+                    summary.get('failed', 0),
+                )
+            except Exception as e:
+                logger.error(f"Background auto-update error: {e}")
+
+            self._stop_event.wait(auto_updater.interval)
 
     def _do_refresh(self):
         """Perform data refresh to trigger CVE scans."""

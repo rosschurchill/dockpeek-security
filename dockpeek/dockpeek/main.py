@@ -1450,3 +1450,70 @@ def check_all_versions():
         'checked': checked,
         'errors': errors
     })
+
+
+# ---------------------------------------------------------------------------
+# Auto-update API
+# ---------------------------------------------------------------------------
+
+@main_bp.route("/api/auto-update/status", methods=["GET"])
+@conditional_login_required
+def auto_update_status():
+    """Return auto-update configuration, eligible containers, and recent history."""
+    from .auto_updater import auto_updater
+
+    try:
+        status = auto_updater.get_status()
+        eligible = auto_updater.get_eligible_containers() if auto_updater.enabled else []
+        history = auto_updater.get_history(limit=10)
+
+        return jsonify({
+            'config': status,
+            'eligible_containers': [
+                {
+                    'name': c.get('name'),
+                    'server': c.get('server'),
+                    'image': c.get('image'),
+                    'latest_version': c.get('latest_version'),
+                }
+                for c in eligible
+            ],
+            'eligible_count': len(eligible),
+            'recent_history': history,
+        })
+    except Exception as e:
+        current_app.logger.error(f"auto-update status error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route("/api/auto-update/trigger", methods=["POST"])
+@conditional_login_required
+def auto_update_trigger():
+    """Manually trigger an auto-update check cycle."""
+    from .auto_updater import auto_updater
+
+    if not auto_updater.enabled:
+        return jsonify({'status': 'disabled', 'message': 'Auto-updater is disabled (AUTO_UPDATE_ENABLED=false)'}), 400
+
+    try:
+        summary = auto_updater.check_and_update()
+        return jsonify(summary)
+    except Exception as e:
+        current_app.logger.error(f"auto-update trigger error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route("/api/auto-update/history", methods=["GET"])
+@conditional_login_required
+def auto_update_history():
+    """Return auto-update history with optional limit parameter."""
+    from .auto_updater import auto_updater
+
+    try:
+        limit = int(request.args.get('limit', 50))
+        limit = max(1, min(limit, 500))
+        records = auto_updater.get_history(limit=limit)
+        return jsonify({'history': records, 'count': len(records)})
+    except Exception as e:
+        current_app.logger.error(f"auto-update history error: {e}")
+        return jsonify({'error': str(e)}), 500

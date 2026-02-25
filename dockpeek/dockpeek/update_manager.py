@@ -230,6 +230,18 @@ class ContainerUpdater:
     def _do_update(self, container_name: str, force: bool = False, new_image: str = None) -> Dict[str, Any]:
         logger.info(f"[{self.server_name}] Starting update for: {container_name} (force={force}, new_image={new_image})")
 
+        # Check orchestration labels for update restrictions
+        try:
+            container_obj = self.client.containers.get(container_name)
+            labels = container_obj.labels or {}
+            update_action = labels.get('dockpeek.update.action', '').lower()
+            if update_action in ('skip', 'pin'):
+                msg = f"Container '{container_name}' has dockpeek.update.action={update_action} — update blocked"
+                logger.warning(f"[{self.server_name}] {msg}")
+                return {"status": "blocked", "message": msg}
+        except docker.errors.NotFound:
+            pass  # Container not found; normal flow will raise the proper error later
+
         # Try Portainer first when it is configured.  This handles compose-managed
         # containers correctly (preserves stack env, networking, and service config).
         if self._portainer:

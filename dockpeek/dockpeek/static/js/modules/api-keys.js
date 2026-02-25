@@ -19,6 +19,7 @@ export function initApiKeys() {
     if (e.target === modal) closeModal();
   });
 
+  let creating = false;
   document.getElementById('api-key-create-btn')?.addEventListener('click', handleCreate);
   document.getElementById('api-key-copy-btn')?.addEventListener('click', handleCopy);
 
@@ -103,6 +104,9 @@ export function initApiKeys() {
   }
 
   async function handleCreate() {
+    if (creating) return;
+    creating = true;
+
     const labelInput = document.getElementById('api-key-label');
     const expirySelect = document.getElementById('api-key-expiry');
     const createBtn = document.getElementById('api-key-create-btn');
@@ -114,6 +118,7 @@ export function initApiKeys() {
       labelInput?.focus();
       labelInput?.classList.add('api-key-input-error');
       setTimeout(() => labelInput?.classList.remove('api-key-input-error'), 1500);
+      creating = false;
       return;
     }
 
@@ -139,6 +144,7 @@ export function initApiKeys() {
     } catch {
       showError('Failed to create key. Please try again.');
     } finally {
+      creating = false;
       if (createBtn) {
         createBtn.disabled = false;
         createBtn.textContent = 'Create Key';

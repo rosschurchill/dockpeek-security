@@ -310,3 +310,206 @@ def dockpeek_check_container_updates(server_filter: str = "all") -> str:
         lines.append("\nAll containers are running their current local image version.")
 
     return "\n".join(lines)
+
+
+@mcp.tool()
+def dockpeek_get_auto_update_status() -> str:
+    """Get the current auto-update scheduler configuration and status.
+
+    Returns the fleet-wide auto-update configuration, including whether scheduled
+    updates are enabled, the check interval, dry-run mode state, Portainer integration
+    status, how many containers are eligible for auto-update, and when the last
+    scheduled run occurred.
+
+    Use this before triggering a manual run (dockpeek_trigger_auto_update) to confirm
+    the scheduler is configured correctly and to understand how many containers are
+    in scope. Dry-run mode means no actual restarts will occur — updates are simulated
+    and logged only, which is safe for verifying eligibility counts in production.
+    """
+    try:
+        data = client.get("/api/auto-update/status")
+    except Exception as e:
+        return f"Error fetching auto-update status: {e}"
+
+    if data.get("error"):
+        return f"Auto-update status unavailable: {data['error']}"
+
+    enabled = data.get("enabled", False)
+    interval_hours = data.get("interval", 0)
+    dry_run = data.get("dry_run", False)
+    last_run = data.get("last_run")
+    eligible_count = data.get("eligible_count", 0)
+    history_count = data.get("history_count", 0)
+    portainer_configured = data.get("portainer_configured", False)
+
+    # Human-readable interval
+    if interval_hours == 1:
+        interval_str = "1 hour"
+    elif interval_hours < 24:
+        interval_str = f"{interval_hours} hours"
+    elif interval_hours == 24:
+        interval_str = "24 hours (daily)"
+    elif interval_hours == 168:
+        interval_str = "168 hours (weekly)"
+    else:
+        interval_str = f"{interval_hours} hours"
+
+    lines = [
+        "Auto-Update Scheduler Status",
+        f"  Enabled:              {'YES' if enabled else 'NO'}",
+        f"  Check interval:       {interval_str}",
+        f"  Dry-run mode:         {'ON (simulate only, no restarts)' if dry_run else 'OFF (live updates)'}",
+        f"  Portainer configured: {'YES' if portainer_configured else 'NO (Docker API fallback)'}",
+        f"  Eligible containers:  {eligible_count}",
+        f"  History entries:      {history_count}",
+        f"  Last run:             {last_run if last_run else 'Never'}",
+    ]
+
+    if not enabled:
+        lines.append(
+            "\nScheduler is disabled. Use dockpeek_trigger_auto_update() to run a "
+            "one-off check, or enable the scheduler in DockPeek configuration."
+        )
+    elif dry_run:
+        lines.append(
+            "\nDry-run mode is active — no containers will be restarted. "
+            "Disable dry-run in configuration to allow live updates."
+        )
+
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def dockpeek_trigger_auto_update() -> str:
+    """Trigger an immediate auto-update run across all eligible containers.
+
+    WRITE OPERATION (unless dry-run mode is enabled) — this will pull updated
+    images and restart containers that have newer image content available. The
+    operation respects the scheduler's dry-run setting: if dry-run is ON, no
+    containers are actually restarted and results reflect what would have happened.
+
+    When Portainer integration is configured, updates go through the Portainer
+    stack API so containers remain within their compose stacks. Without Portainer,
+    the raw Docker API is used as a fallback.
+
+    Use dockpeek_get_auto_update_status() first to confirm eligible container count
+    and dry-run mode before triggering. Review results and check
+    dockpeek_get_auto_update_history() afterwards for a persistent audit trail.
+    """
+    try:
+        data = client.post("/api/auto-update/trigger", json={})
+    except Exception as e:
+        return f"Error triggering auto-update: {e}"
+
+    if not data.get("success"):
+        error = data.get("error", "Unknown error")
+        return f"Auto-update run failed: {error}"
+
+    summary = data.get("summary") or {}
+    checked = summary.get("checked", 0)
+    updated = summary.get("updated", 0)
+    skipped = summary.get("skipped", 0)
+    failed = summary.get("failed", 0)
+    details = summary.get("details") or []
+
+    lines = [
+        "Auto-Update Run Complete",
+        f"  Containers checked: {checked}",
+        f"  Updated:            {updated}",
+        f"  Skipped:            {skipped}",
+        f"  Failed:             {failed}",
+    ]
+
+    updated_details = [d for d in details if d.get("status") in ("updated", "dry-run")]
+    failed_details = [d for d in details if d.get("status") == "failed"]
+
+    if updated_details:
+        lines.append("")
+        lines.append("Updated containers:")
+        for d in updated_details:
+            container = d.get("container", "?")
+            server = d.get("server", "?")
+            old_img = d.get("old_image", "?")
+            new_img = d.get("new_image", "?")
+            method = d.get("method", "?")
+            status = d.get("status", "?")
+            lines.append(f"  {container} [{server}]  ({status})")
+            lines.append(f"    {old_img}  ->  {new_img}")
+            lines.append(f"    Method: {method}")
+
+    if failed_details:
+        lines.append("")
+        lines.append("Failed containers:")
+        for d in failed_details:
+            container = d.get("container", "?")
+            server = d.get("server", "?")
+            error = d.get("error") or "no detail"
+            lines.append(f"  {container} [{server}]")
+            lines.append(f"    Error: {error}")
+
+    if not updated_details and not failed_details and skipped == checked:
+        lines.append("\nAll eligible containers are already up to date — nothing to update.")
+
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def dockpeek_get_auto_update_history(limit: int = 20) -> str:
+    """Retrieve the auto-update event history as an audit timeline.
+
+    Returns a chronological log of every auto-update action recorded by DockPeek,
+    including both successful updates and failures. Each entry shows the container,
+    server, old and new image references, the update method used, and any error
+    detail for failed attempts.
+
+    Args:
+        limit: Maximum number of history entries to return, newest first. Default 20.
+               Increase for full audit coverage (up to 50 via the API).
+
+    Use this after a scheduled or manual update run to verify what changed and
+    confirm that containers were updated via the expected method (Portainer stack
+    vs Docker API direct). Failed entries should be investigated — common causes
+    include Portainer connectivity loss, image pull failures, and containers that
+    were stopped at update time.
+    """
+    try:
+        data = client.get(f"/api/auto-update/history?limit={limit}")
+    except Exception as e:
+        return f"Error fetching auto-update history: {e}"
+
+    if data.get("error"):
+        return f"Auto-update history unavailable: {data['error']}"
+
+    history = data.get("history") or []
+
+    if not history:
+        return (
+            "Auto-Update History\n"
+            "  No update events recorded yet.\n"
+            "  Run dockpeek_trigger_auto_update() or wait for a scheduled run."
+        )
+
+    lines = [
+        f"Auto-Update History  (showing {len(history)} of last {limit} entries)",
+        "",
+    ]
+
+    for entry in history:
+        timestamp = entry.get("timestamp", "?")
+        container = entry.get("container", "?")
+        server = entry.get("server", "?")
+        old_image = entry.get("old_image", "?")
+        new_image = entry.get("new_image", "?")
+        status = entry.get("status", "?")
+        method = entry.get("method", "?")
+        error = entry.get("error")
+
+        status_upper = status.upper()
+        lines.append(f"[{timestamp}]  {container} [{server}]  {status_upper}")
+        lines.append(f"  {old_image}  ->  {new_image}")
+        lines.append(f"  Method: {method}")
+        if error:
+            lines.append(f"  Error:  {error}")
+        lines.append("")
+
+    return "\n".join(lines).rstrip()
