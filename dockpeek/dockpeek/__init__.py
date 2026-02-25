@@ -3,6 +3,7 @@ import logging
 from flask import Flask
 from config import Config
 from .extensions import login_manager, cors
+from . import dns_cache  # noqa: F401 — activates process-level DNS caching on import
 
 _scheduler_started = False
 
