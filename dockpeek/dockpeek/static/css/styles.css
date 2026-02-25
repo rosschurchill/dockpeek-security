@@ -19,27 +19,27 @@ body:not(.dark-mode) {
   min-height: 100vh;
 }
 
-/* Dark mode body - rich coloured dark gradient */
+/* Dark mode body - slate neutral dark gradient */
 body.dark-mode {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #1a1035 65%, #0f172a 100%);
+  background: linear-gradient(135deg, #111318 0%, #16181f 35%, #141620 65%, #111318 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
 
 .login-box {
-  background-color: #161b22;
+  background-color: #1a1d24;
 }
 
 .login-box input {
-  background-color: #0d1117;
-  border-color: #30363d;
+  background-color: #111318;
+  border-color: #2a2d35;
   color: #c9d1d9;
 }
 
 .login-box input:focus {
   outline: none;
-  border-color: #58a6ff;
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
 }
 
 .login-box label {
@@ -141,7 +141,7 @@ body.dark-mode .github {
 }
 
 .footer a:hover {
-  color: #3b82f6;
+  color: #f59e0b;
 }
 
 body.dark-mode .footer {
@@ -153,7 +153,7 @@ body.dark-mode .footer a {
 }
 
 body.dark-mode .footer a:hover {
-  color: #60a5fa;
+  color: #fbbf24;
 }
 
 .status-none {
@@ -227,30 +227,30 @@ body.dark-mode .data-content-name {
 
 /* Ports Badge - Modern styling */
 [data-content="ports"] .badge {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
-  color: #2563eb;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+  color: #d97706;
   border-radius: 6px;
   padding: 0.2rem 0.5rem;
   font-weight: 500;
   font-size: 0.8rem;
   display: inline-block;
   white-space: nowrap;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   transition: all 0.15s ease;
 }
 
 [data-content="ports"] .badge:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.15) 100%);
 }
 
 body.dark-mode [data-content="ports"] .badge {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
-  color: #60a5fa;
-  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 body.dark-mode [data-content="ports"] .badge:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.2) 100%);
 }
 
 [data-content="ports"] .custom-port .badge {
@@ -355,8 +355,8 @@ body:not(.dark-mode) input[type="text"] {
 }
 
 #search-input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border-color: #f59e0b;
 }
 
 body.dark-mode input[type="text"] {
@@ -392,7 +392,7 @@ body.dark-mode #search-input::placeholder {
   margin-bottom: 8px;
   padding: 8px 16px;
   background: white;
-  border: 2px solid #91bbff;
+  border: 2px solid rgba(245, 158, 11, 0.5);
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 100;
@@ -400,7 +400,7 @@ body.dark-mode #search-input::placeholder {
 
 .dark-mode .free-port-result {
   background: #1f2937;
-  border-color: #3b82f6;
+  border-color: #f59e0b;
 }
 
 .free-port-content {
@@ -435,7 +435,7 @@ body.dark-mode #search-input::placeholder {
 
 .copy-port-button {
   padding: 6px;
-  background: #3b82f6;
+  background: #f59e0b;
   color: white;
   border: none;
   border-radius: 6px;
@@ -447,7 +447,7 @@ body.dark-mode #search-input::placeholder {
 }
 
 .copy-port-button:hover {
-  background: #2563eb;
+  background: #d97706;
 }
 
 .copy-port-button.copied {
@@ -491,12 +491,12 @@ body.dark-mode #refresh-button:hover {
 
 #theme-switcher:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
 }
 
 .header-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
 }
 
 .theme-switcher-wrapper {
@@ -548,8 +548,8 @@ body.dark-mode #refresh-button:hover {
 }
 
 .theme-menu-item.active {
-  background-color: #dbeafe;
-  color: #2563eb;
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #d97706;
 }
 
 .dark-mode .theme-menu {
@@ -566,8 +566,8 @@ body.dark-mode #refresh-button:hover {
 }
 
 .dark-mode .theme-menu-item.active {
-  background-color: #1e3a8a;
-  color: #93c5fd;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 
 .source-link[data-tooltip-top-right]::after {
@@ -780,10 +780,10 @@ code {
 }
 
 .filter-button.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #111318;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .filter-button.inactive {
@@ -805,10 +805,10 @@ body.dark-mode .filter-button:hover {
 }
 
 body.dark-mode .filter-button.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #111318;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 body.dark-mode .filter-button.inactive {
@@ -945,7 +945,7 @@ body.dark-mode .modal-overlay:not(.hidden) {
 }
 
 body.dark-mode .modal-content {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #1a1d24 0%, #111318 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
@@ -1076,7 +1076,7 @@ body.dark-mode #updates-list .no-updates-message {
 }
 
 body.dark-mode #updates-modal.no-update #updates-list {
-  background-color: #0d1117;
+  background-color: #111318;
 }
 
 
@@ -1124,7 +1124,7 @@ body.dark-mode .progress-bar {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-color, #3b82f6), var(--accent-hover, #2563eb));
+  background: linear-gradient(90deg, var(--accent-color, #f59e0b), var(--accent-hover, #d97706));
   transition: width 0.3s ease;
   position: relative;
 }
@@ -1628,7 +1628,7 @@ body.dark-mode .column-menu-button:hover {
 }
 
 body.dark-mode .column-menu {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #1a1d24 0%, #111318 100%);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
@@ -1741,14 +1741,14 @@ body.dark-mode #custom-registries-button:hover {
 
 /* ── Custom Registries Modal ── */
 .registry-info-box {
-  background: rgba(59, 130, 246, 0.06);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   color: #374151;
 }
 
 body.dark-mode .registry-info-box {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.25);
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
   color: #cbd5e1;
 }
 
@@ -2079,26 +2079,26 @@ body:not(.dark-mode) .stat-medium {
 
 /* Low */
 .stat-low {
-  background: rgba(30, 58, 95, 0.7);
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.3);
 }
 body:not(.dark-mode) .stat-low {
-  background: rgba(30, 58, 95, 0.12);
-  color: #1e3a5f;
-  border-color: rgba(30, 58, 95, 0.2);
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+  border-color: rgba(100, 116, 139, 0.2);
 }
 
 /* Scanned progress */
 .stat-scanned {
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.2);
 }
 body:not(.dark-mode) .stat-scanned {
-  background: rgba(59, 130, 246, 0.08);
-  color: #2563eb;
-  border-color: rgba(59, 130, 246, 0.15);
+  background: rgba(245, 158, 11, 0.08);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.15);
 }
 
 /* CVE Total */
@@ -2250,7 +2250,7 @@ body:not(.dark-mode) .stat-cve-total {
 
 
 .column-menu-item.drag-over {
-  border-top: 2px solid #3b82f6;
+  border-top: 2px solid #f59e0b;
 }
 
 .drag-handle {
@@ -2398,7 +2398,7 @@ body.dark-mode .single-row-template td {
 }
 
 body.dark-mode .single-row-template:hover td {
-  background: rgba(59,130,246,0.1) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
 }
 
 /* Card shape using .first-visible/.last-visible (applied by column-visibility.js) */
@@ -2685,7 +2685,7 @@ body.dark-mode .vuln-clickable:hover {
 .vuln-critical { background: rgba(127, 29, 29, 0.85);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3);  font-family: "Fira Code", ui-monospace, monospace; }
 .vuln-high     { background: rgba(120, 53, 15, 0.85);  color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); font-family: "Fira Code", ui-monospace, monospace; }
 .vuln-medium   { background: rgba(22,  78, 99, 0.85);  color: #67e8f9; border: 1px solid rgba(6,182,212,0.3);  font-family: "Fira Code", ui-monospace, monospace; }
-.vuln-low      { background: rgba(30,  58, 95, 0.85);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); font-family: "Fira Code", ui-monospace, monospace; }
+.vuln-low      { background: rgba(51,  65, 85, 0.85);  color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); font-family: "Fira Code", ui-monospace, monospace; }
 
 /* Zero count - individual zero within a non-clean row */
 .vuln-badge.vuln-zero {
@@ -2791,7 +2791,7 @@ body.dark-mode .scan-now-btn:hover {
 
 body.dark-mode .network-badge {
   color: #a5b4fc;
-  background-color: #1e1b4b;
+  background-color: #1e1c2e;
 }
 
 body.dark-mode .network-badge:hover {
@@ -2878,7 +2878,7 @@ body.dark-mode .vuln-item:hover {
 }
 
 .vuln-id a:hover {
-  color: #2563eb;
+  color: #d97706;
   text-decoration: underline;
 }
 
@@ -2887,7 +2887,7 @@ body.dark-mode .vuln-id {
 }
 
 body.dark-mode .vuln-id a:hover {
-  color: #60a5fa;
+  color: #f59e0b;
 }
 
 .vuln-severity-badge {
@@ -2912,7 +2912,7 @@ body.dark-mode .vuln-id a:hover {
 }
 
 .vuln-severity-low {
-  background-color: #2563eb;
+  background-color: #64748b;
 }
 
 .vuln-badges {
@@ -3120,7 +3120,7 @@ body.dark-mode .dropdown-header {
 .mark-all-read {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: #f59e0b;
   font-size: 0.75rem;
   cursor: pointer;
   padding: 4px 8px;
@@ -3128,11 +3128,11 @@ body.dark-mode .dropdown-header {
 }
 
 .mark-all-read:hover {
-  background: #eff6ff;
+  background: rgba(245, 158, 11, 0.1);
 }
 
 body.dark-mode .mark-all-read:hover {
-  background: #1e3a5f;
+  background: rgba(245, 158, 11, 0.15);
 }
 
 .notification-list {
@@ -3508,7 +3508,7 @@ body.dark-mode .stack-group-count {
 .cve-critical { background: rgba(239,68,68,0.2);  color: #ef4444; border: 1px solid rgba(239,68,68,0.4); }
 .cve-high     { background: rgba(249,115,22,0.2); color: #f97316; border: 1px solid rgba(249,115,22,0.4); }
 .cve-medium   { background: rgba(234,179,8,0.2);  color: #eab308; border: 1px solid rgba(234,179,8,0.4); }
-.cve-low      { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.cve-low      { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); }
 
 /* Logs button */
 .panel-logs-btn {
@@ -3586,8 +3586,8 @@ body.dark-mode .stack-group-count {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .panel-identity {
@@ -3608,6 +3608,8 @@ body.dark-mode .stack-group-count {
 
 .panel-image-name {
   font-size: 11px;
+  font-weight: 400;
+  opacity: 0.6;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3774,14 +3776,14 @@ body.dark-mode .stack-group-count {
 .cve-pip-medium { background: #eab308; box-shadow: 0 0 4px rgba(234, 179, 8, 0.6); }
 
 /* Low */
-.cve-row-low { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
-.cve-pip-low { background: #4ade80; box-shadow: 0 0 4px rgba(74, 222, 128, 0.5); }
+.cve-row-low { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+.cve-pip-low { background: #64748b; box-shadow: 0 0 4px rgba(100, 116, 139, 0.4); }
 
 /* Panel status section tinting by worst CVE severity */
 .cve-sev-critical .panel-status-section { border-color: rgba(239, 68, 68, 0.3) !important; }
 .cve-sev-high     .panel-status-section { border-color: rgba(249, 115, 22, 0.3) !important; }
 .cve-sev-medium   .panel-status-section { border-color: rgba(234, 179, 8, 0.3) !important; }
-.cve-sev-low      .panel-status-section { border-color: rgba(74, 222, 128, 0.3) !important; }
+.cve-sev-low      .panel-status-section { border-color: rgba(148, 163, 184, 0.3) !important; }
 .cve-clean        .panel-status-section { border-color: rgba(74, 222, 128, 0.25) !important; }
 
 /* Pending / error states */
@@ -3833,6 +3835,10 @@ body.dark-mode .panel-status-section {
 }
 
 /* Running — soft green dot only, glass stays glass */
+body.dark-mode .container-panel.is-running {
+  border-left: 3px solid rgba(34, 197, 94, 0.5);
+}
+
 body.dark-mode .container-panel.is-running .panel-status-section {
   background: rgba(34, 197, 94, 0.07);
   border: 1px solid rgba(34, 197, 94, 0.18);
@@ -3922,14 +3928,14 @@ body:not(.dark-mode) .panel-logs-btn:hover {
 }
 
 body:not(.dark-mode) .panel-running-badge--active {
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563eb;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 body:not(.dark-mode) .panel-running-dot {
-  background: #3b82f6;
-  box-shadow: 0 0 4px rgba(59, 130, 246, 0.6);
+  background: #22c55e;
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
 }
 
 body:not(.dark-mode) .container-panel.is-running .panel-status-section {
@@ -4032,23 +4038,23 @@ body:not(.dark-mode) .modal-footer {
 }
 .modal-ok-btn {
   padding: 8px 20px;
-  background: #3b82f6;
-  color: #fff;
+  background: #f59e0b;
+  color: #111318;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
 }
-.modal-ok-btn:hover { background: #2563eb; }
+.modal-ok-btn:hover { background: #d97706; }
 
 /* Create section */
 .api-keys-create-section {
   padding: 14px 16px;
   margin-bottom: 14px;
   border-radius: 8px;
-  background: rgba(59,130,246,0.08);
-  border: 1px solid rgba(59,130,246,0.15);
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.15);
 }
 .api-keys-description {
   font-size: 13px;
@@ -4073,7 +4079,7 @@ body:not(.dark-mode) .modal-footer {
   outline: none;
   transition: border-color 0.15s;
 }
-.api-key-input:focus { border-color: rgba(59,130,246,0.6); }
+.api-key-input:focus { border-color: rgba(245,158,11,0.6); }
 .api-key-input.api-key-input-error { border-color: #ef4444; }
 .api-key-select {
   padding: 8px 12px;
@@ -4087,8 +4093,8 @@ body:not(.dark-mode) .modal-footer {
 }
 .api-key-create-btn {
   padding: 8px 16px;
-  background: #3b82f6;
-  color: #fff;
+  background: #f59e0b;
+  color: #111318;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -4097,7 +4103,7 @@ body:not(.dark-mode) .modal-footer {
   white-space: nowrap;
   transition: background 0.15s;
 }
-.api-key-create-btn:hover { background: #2563eb; }
+.api-key-create-btn:hover { background: #d97706; }
 .api-key-create-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 /* New key banner */
@@ -4218,8 +4224,8 @@ body:not(.dark-mode) .modal-footer {
 
 /* ---- Light mode overrides ---- */
 body:not(.dark-mode) .api-keys-create-section {
-  background: rgba(59,130,246,0.06);
-  border-color: rgba(59,130,246,0.18);
+  background: rgba(245,158,11,0.06);
+  border-color: rgba(245,158,11,0.18);
 }
 body:not(.dark-mode) .api-key-input,
 body:not(.dark-mode) .api-key-select {
@@ -4228,7 +4234,7 @@ body:not(.dark-mode) .api-key-select {
   color: #1e293b;
 }
 body:not(.dark-mode) .api-key-input:focus {
-  border-color: #3b82f6;
+  border-color: #f59e0b;
 }
 body:not(.dark-mode) .api-key-banner {
   background: rgba(34,197,94,0.08);

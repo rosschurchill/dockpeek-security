@@ -45,8 +45,10 @@ class ApiKeyDB:
     def __init__(self, db_path: str = None):
         self._db_path = db_path or os.environ.get(
             'API_KEYS_DB',
-            '/tmp/dockpeek_api_keys.db'
+            '/app/data/dockpeek_api_keys.db'
         )
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(self._db_path), exist_ok=True)
         self._lock = Lock()
         self._initialized = False
 
@@ -212,7 +214,14 @@ class ApiKeyDB:
                     ORDER BY created_at DESC
                     """
                 ).fetchall()
-                return [dict(row) for row in rows]
+                result = []
+                for row in rows:
+                    d = dict(row)
+                    # Normalise field names for the frontend
+                    d['prefix'] = d.pop('key_prefix', '')
+                    d['revoked'] = not d.get('is_active', 1)
+                    result.append(d)
+                return result
 
         except Exception as e:
             logger.error(f"Error listing API keys: {e}")
