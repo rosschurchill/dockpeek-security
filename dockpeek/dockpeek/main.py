@@ -27,16 +27,32 @@ main_bp = Blueprint('main', __name__)
 
 
 def conditional_login_required(f):
-    """Dekorator który wymaga logowania tylko gdy autoryzacja nie jest wyłączona."""
+    """Decorator that requires auth unless DISABLE_AUTH is set.
+
+    Auth order:
+    1. DISABLE_AUTH config flag — bypass everything.
+    2. X-API-Key header — stateless token auth for MCP / programmatic access.
+    3. Session-based Flask-Login auth.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_app.config.get('DISABLE_AUTH', False):
             return f(*args, **kwargs)
-        else:
-            from flask_login import current_user
-            if not current_user.is_authenticated:
-                return current_app.login_manager.unauthorized()
-            return f(*args, **kwargs)
+
+        # Check API key auth first (stateless, for MCP/programmatic access)
+        api_key = request.headers.get('X-API-Key')
+        if api_key:
+            from .api_keys import api_key_db
+            key_info = api_key_db.validate_key(api_key)
+            if key_info:
+                request.api_key_info = key_info
+                return f(*args, **kwargs)
+            return jsonify({"error": "Invalid or expired API key"}), 401
+
+        # Fall back to session-based auth
+        if not current_user.is_authenticated:
+            return current_app.login_manager.unauthorized()
+        return f(*args, **kwargs)
     return decorated_function
 
 @main_bp.route("/")

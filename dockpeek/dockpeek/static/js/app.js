@@ -18,6 +18,7 @@ import { initVersionModal } from './modules/version-check.js';
 import { initSecurityDashboard, updateSecurityDashboard } from './modules/security-dashboard.js';
 import { initSecurityNotifications } from './modules/security-notifications.js';
 import { initCustomRegistries } from './modules/custom-registries.js';
+import { initApiKeys } from './modules/api-keys.js';
 
 const tableRenderer = new TableRenderer('container-panel-template', 'panels-container');
 let dragDropHandler = null;
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSecurityDashboard();
   initSecurityNotifications();
   initCustomRegistries();
+  initApiKeys();
   loadRegistryTemplates();
   fetchContainerData();
   initEventListeners();

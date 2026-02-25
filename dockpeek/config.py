@@ -58,3 +58,6 @@ class Config:
     NTFY_COOLDOWN_MINUTES = int(os.environ.get("NTFY_COOLDOWN_MINUTES", "60"))
     NTFY_MIN_CRITICAL = int(os.environ.get("NTFY_MIN_CRITICAL", "1"))
     NTFY_MIN_HIGH = int(os.environ.get("NTFY_MIN_HIGH", "10"))
+
+    # API key authentication
+    API_KEYS_DB = os.environ.get('API_KEYS_DB', '/tmp/dockpeek_api_keys.db')

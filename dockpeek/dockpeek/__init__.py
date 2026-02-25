@@ -39,6 +39,9 @@ def create_app(config_class=Config):
     from . import main
     app.register_blueprint(main.main_bp)
 
+    from . import api_keys
+    app.register_blueprint(api_keys.api_keys_bp)
+
     # Register Prometheus metrics endpoint (no auth required for scraping)
     try:
         from .metrics import metrics_bp, init_app_info

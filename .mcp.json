@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "dockpeek": {
+      "type": "stdio",
+      "command": "/home/ross/Documents/general/dockpeek-security/mcp-server/.venv/bin/dockpeek-mcp",
+      "env": {
+        "DOCKPEEK_URL": "http://10.0.0.200:5051",
+        "DOCKPEEK_USERNAME": "admin",
+        "DOCKPEEK_PASSWORD": "dockpeek-security-2026"
+      }
+    }
+  }
+}

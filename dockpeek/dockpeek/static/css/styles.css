@@ -3989,3 +3989,264 @@ body:not(.dark-mode) .panel-status-ratio {
 /* ============================================================ */
 /* === END PANEL GRID REDESIGN                               === */
 /* ============================================================ */
+
+/* ============================================================ */
+/* === API KEYS MODAL                                        === */
+/* ============================================================ */
+
+/* Modal structural helpers (shared) */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+.modal-close-btn:hover { opacity: 1; }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+body:not(.dark-mode) .modal-footer {
+  border-top-color: rgba(0,0,0,0.08);
+}
+.modal-ok-btn {
+  padding: 8px 20px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+.modal-ok-btn:hover { background: #2563eb; }
+
+/* Create section */
+.api-keys-create-section {
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.15);
+}
+.api-keys-description {
+  font-size: 13px;
+  margin: 0 0 10px;
+  opacity: 0.75;
+}
+.api-keys-create-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.api-key-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  color: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.api-key-input:focus { border-color: rgba(59,130,246,0.6); }
+.api-key-input.api-key-input-error { border-color: #ef4444; }
+.api-key-select {
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+.api-key-create-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.api-key-create-btn:hover { background: #2563eb; }
+.api-key-create-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* New key banner */
+.api-key-banner {
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.28);
+}
+.api-key-banner-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #22c55e;
+  margin: 0 0 8px;
+}
+.api-key-banner-key {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.api-key-banner-key code {
+  flex: 1;
+  font-size: 12px;
+  font-family: monospace;
+  background: rgba(0,0,0,0.3);
+  padding: 8px 10px;
+  border-radius: 4px;
+  word-break: break-all;
+  color: #86efac;
+}
+.api-key-copy-btn {
+  padding: 6px 12px;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.api-key-copy-btn:hover { background: #16a34a; }
+
+/* Key list */
+.api-keys-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+}
+.api-keys-loading,
+.api-keys-empty {
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  opacity: 0.5;
+}
+.api-key-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  gap: 10px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.api-key-row:last-child { border-bottom: none; }
+.api-key-prefix {
+  font-family: monospace;
+  font-size: 12px;
+  opacity: 0.65;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+.api-key-label {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.api-key-meta {
+  font-size: 11px;
+  opacity: 0.55;
+  min-width: 80px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.api-key-badge {
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.api-key-badge-active  { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.api-key-badge-expired { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.api-key-badge-revoked { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.api-key-revoke-btn {
+  padding: 4px 10px;
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.28);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.api-key-revoke-btn:hover { background: rgba(239,68,68,0.28); }
+
+/* ---- Light mode overrides ---- */
+body:not(.dark-mode) .api-keys-create-section {
+  background: rgba(59,130,246,0.06);
+  border-color: rgba(59,130,246,0.18);
+}
+body:not(.dark-mode) .api-key-input,
+body:not(.dark-mode) .api-key-select {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(0,0,0,0.15);
+  color: #1e293b;
+}
+body:not(.dark-mode) .api-key-input:focus {
+  border-color: #3b82f6;
+}
+body:not(.dark-mode) .api-key-banner {
+  background: rgba(34,197,94,0.08);
+}
+body:not(.dark-mode) .api-key-banner-key code {
+  background: rgba(0,0,0,0.06);
+  color: #15803d;
+}
+body:not(.dark-mode) .api-keys-list {
+  border-color: rgba(0,0,0,0.08);
+}
+body:not(.dark-mode) .api-key-row {
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+body:not(.dark-mode) .modal-close-btn {
+  color: #374151;
+}
+
+/* ============================================================ */
+/* === END API KEYS MODAL                                    === */
+/* ============================================================ */

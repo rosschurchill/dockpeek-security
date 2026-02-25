@@ -71,6 +71,15 @@
             </svg>
           </button>
 
+          {% if not config.DISABLE_AUTH %}
+          <!-- API Keys -->
+          <button id="api-keys-button" class="header-btn header-btn-icon" data-tooltip="API Keys">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+          </button>
+          {% endif %}
+
           <!-- Check for updates -->
           <button id="check-updates-button" class="header-btn header-btn-icon" data-tooltip="Check for updates">
             <svg fill="currentColor" viewBox="2 2 52 52" xmlns="http://www.w3.org/2000/svg">
@@ -612,6 +621,47 @@
         <button id="registries-modal-ok" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
           Close
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Keys Modal -->
+  <div id="api-keys-modal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3>API Keys</h3>
+        <button id="api-keys-modal-close" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="api-keys-create-section">
+        <p class="api-keys-description">Create API keys for MCP servers, scripts, and programmatic access.</p>
+        <div class="api-keys-create-form">
+          <input type="text" id="api-key-label" placeholder="Key label (e.g. MCP Server)" class="api-key-input">
+          <select id="api-key-expiry" class="api-key-select">
+            <option value="3600">1 hour</option>
+            <option value="86400">24 hours</option>
+            <option value="604800" selected>7 days</option>
+            <option value="2592000">30 days</option>
+            <option value="7776000">90 days</option>
+          </select>
+          <button id="api-key-create-btn" class="api-key-create-btn">Create Key</button>
+        </div>
+      </div>
+
+      <div id="api-key-created-banner" class="api-key-banner hidden">
+        <p class="api-key-banner-text">Key created — copy it now, it won't be shown again.</p>
+        <div class="api-key-banner-key">
+          <code id="api-key-plaintext"></code>
+          <button id="api-key-copy-btn" class="api-key-copy-btn">Copy</button>
+        </div>
+      </div>
+
+      <div id="api-keys-list" class="api-keys-list">
+        <div class="api-keys-loading">Loading keys...</div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="api-keys-modal-ok" class="modal-ok-btn">Close</button>
       </div>
     </div>
   </div>
