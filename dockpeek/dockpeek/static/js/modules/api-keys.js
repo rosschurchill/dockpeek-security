@@ -49,8 +49,8 @@ export function initApiKeys() {
     try {
       const res = await fetch(apiUrl('/api/keys'));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const keys = await res.json();
-      renderKeyList(listEl, keys);
+      const data = await res.json();
+      renderKeyList(listEl, data.keys || []);
     } catch {
       listEl.innerHTML = '<div class="api-keys-empty">Could not load API keys.</div>';
     }

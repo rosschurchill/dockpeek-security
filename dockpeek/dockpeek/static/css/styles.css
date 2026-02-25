@@ -3834,9 +3834,25 @@ body.dark-mode .panel-status-section {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Running — soft green dot only, glass stays glass */
+/* Running — left border colour reflects security posture */
 body.dark-mode .container-panel.is-running {
-  border-left: 3px solid rgba(34, 197, 94, 0.5);
+  border-left: 3px solid rgba(34, 197, 94, 0.5);   /* default: green (running, no scan yet) */
+}
+/* Security gradient — overrides green when CVE data is present */
+body.dark-mode .container-panel.cve-clean {
+  border-left: 3px solid rgba(34, 197, 94, 0.6);    /* clean: bright green */
+}
+body.dark-mode .container-panel.cve-sev-low {
+  border-left: 3px solid rgba(148, 163, 184, 0.5);  /* low: slate */
+}
+body.dark-mode .container-panel.cve-sev-medium {
+  border-left: 3px solid rgba(234, 179, 8, 0.6);    /* medium: yellow */
+}
+body.dark-mode .container-panel.cve-sev-high {
+  border-left: 3px solid rgba(249, 115, 22, 0.7);   /* high: orange */
+}
+body.dark-mode .container-panel.cve-sev-critical {
+  border-left: 3px solid rgba(239, 68, 68, 0.8);    /* critical: red */
 }
 
 body.dark-mode .container-panel.is-running .panel-status-section {
@@ -3911,6 +3927,12 @@ body:not(.dark-mode) .container-panel {
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+/* Light mode security border */
+body:not(.dark-mode) .container-panel.cve-clean { border-left: 3px solid rgba(22, 163, 74, 0.5); }
+body:not(.dark-mode) .container-panel.cve-sev-low { border-left: 3px solid rgba(100, 116, 139, 0.4); }
+body:not(.dark-mode) .container-panel.cve-sev-medium { border-left: 3px solid rgba(202, 138, 4, 0.5); }
+body:not(.dark-mode) .container-panel.cve-sev-high { border-left: 3px solid rgba(234, 88, 12, 0.6); }
+body:not(.dark-mode) .container-panel.cve-sev-critical { border-left: 3px solid rgba(220, 38, 38, 0.7); }
 
 body:not(.dark-mode) .panel-status-section {
   background: rgba(255, 255, 255, 0.5);
