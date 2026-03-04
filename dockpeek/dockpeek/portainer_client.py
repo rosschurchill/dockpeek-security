@@ -5,7 +5,7 @@ Provides stack lookup and redeployment via the Portainer REST API.
 Configured entirely via environment variables — no config files required.
 
 Environment variables:
-  PORTAINER_URL          Base URL, e.g. https://10.0.0.200:9443
+  PORTAINER_URL          Base URL, e.g. https://10.0.10.200:9443
   PORTAINER_API_KEY      ptr_* token from Portainer
   PORTAINER_ENDPOINT_ID  Docker endpoint ID (default: 2)
   PORTAINER_VERIFY_SSL   Whether to verify TLS cert (default: false)

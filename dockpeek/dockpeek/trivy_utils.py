@@ -375,94 +375,59 @@ class TrivyClient:
                     logger.debug(f"Using cached scan for {image_name}")
                     return cached
 
-        # Perform scan using Trivy via Docker exec into trivy container
+        # Perform scan using local trivy CLI calling the Trivy server over the network.
+        # This avoids needing Docker exec API access (blocked by socket proxies).
         start_time = datetime.now()
         try:
             logger.info(f"Scanning image: {image_name}")
 
-            # Get Docker client for exec
-            client = get_docker_client()
-            if not client:
-                logger.error("Docker client unavailable for Trivy exec")
-                return None
+            cmd = [
+                'trivy', 'image',
+                '--server', self._server_url,
+                '--format', 'json',
+                '--quiet',
+                '--timeout', f'{self._timeout}s',
+                image_name,
+            ]
 
-            # Find the Trivy container
             try:
-                trivy_container = client.containers.get(self._trivy_container)
-            except docker.errors.NotFound:
-                logger.error(f"Trivy container '{self._trivy_container}' not found")
+                proc = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    timeout=self._timeout + 30,
+                )
+            except subprocess.TimeoutExpired:
+                logger.error(f"Trivy scan timed out for {image_name} after {self._timeout + 30}s")
+                failed_result = ScanResult(
+                    image=image_name,
+                    image_digest=image_digest or f"failed:{image_name}",
+                    scan_timestamp=datetime.now(),
+                    scan_duration=self._timeout + 30.0,
+                    error="scan_timeout"
+                )
+                if image_digest:
+                    self._cache.set(image_digest, failed_result)
                 return None
-            except Exception as e:
-                logger.error(f"Error finding Trivy container: {e}")
+
+            exit_code = proc.returncode
+            stdout = proc.stdout
+            stderr = proc.stderr
+
+            if exit_code != 0:
+                error_msg = stderr.decode('utf-8', errors='replace') if stderr else 'Unknown error'
+                logger.error(f"Trivy scan failed for {image_name}: {error_msg[:500]}")
+                failed_result = ScanResult(
+                    image=image_name,
+                    image_digest=image_digest or f"failed:{image_name}",
+                    scan_timestamp=datetime.now(),
+                    scan_duration=(datetime.now() - start_time).total_seconds(),
+                    error="scan_failed"
+                )
+                if image_digest:
+                    self._cache.set(image_digest, failed_result)
                 return None
 
-            # Build trivy command - scan the image via the trivy server
-            # Use localhost since we're exec'ing into the trivy container where server is running
-            # --timeout prevents hanging on unreachable registries
-            cmd = f'trivy image --server http://localhost:4954 --format json --quiet --timeout {self._timeout}s "{image_name}"'
-
-            # Execute the command in the Trivy container with a timeout.
-            # exec_run has no built-in timeout, so we run it in a thread.
-            try:
-                exec_result_holder = [None]
-                exec_error_holder = [None]
-
-                def _run_exec():
-                    try:
-                        exec_result_holder[0] = trivy_container.exec_run(
-                            cmd=['sh', '-c', cmd],
-                            demux=True
-                        )
-                    except Exception as exc:
-                        exec_error_holder[0] = exc
-
-                exec_thread = Thread(target=_run_exec, daemon=True)
-                exec_thread.start()
-                exec_thread.join(timeout=self._timeout + 30)  # Extra 30s beyond trivy's own timeout
-
-                if exec_thread.is_alive():
-                    logger.error(f"Trivy scan timed out for {image_name} after {self._timeout + 30}s")
-                    failed_result = ScanResult(
-                        image=image_name,
-                        image_digest=image_digest or f"failed:{image_name}",
-                        scan_timestamp=datetime.now(),
-                        scan_duration=self._timeout + 30.0,
-                        error="scan_timeout"
-                    )
-                    if image_digest:
-                        self._cache.set(image_digest, failed_result)
-                    return None
-
-                if exec_error_holder[0]:
-                    raise exec_error_holder[0]
-
-                exec_result = exec_result_holder[0]
-                if exec_result is None:
-                    logger.error(f"Trivy scan returned no result for {image_name}")
-                    return None
-
-                exit_code = exec_result.exit_code
-                stdout, stderr = exec_result.output
-
-                if exit_code != 0:
-                    error_msg = stderr.decode('utf-8') if stderr else 'Unknown error'
-                    logger.error(f"Trivy scan failed for {image_name}: {error_msg[:500]}")
-                    failed_result = ScanResult(
-                        image=image_name,
-                        image_digest=image_digest or f"failed:{image_name}",
-                        scan_timestamp=datetime.now(),
-                        scan_duration=(datetime.now() - start_time).total_seconds(),
-                        error="scan_failed"
-                    )
-                    if image_digest:
-                        self._cache.set(image_digest, failed_result)
-                    return None
-
-                output = stdout.decode('utf-8') if stdout else ''
-
-            except Exception as e:
-                logger.error(f"Docker exec failed for {image_name}: {e}")
-                return None
+            output = stdout.decode('utf-8', errors='replace') if stdout else ''
 
             trivy_response = json.loads(output) if output else {}
 

@@ -185,7 +185,7 @@ export function updateDisplay() {
   }
 
   if (filterUpdatesCheckbox.checked) {
-    workingData = workingData.filter(c => c.update_available);
+    workingData = workingData.filter(c => c.update_available || c.newer_version_available);
   }
 
   const searchTerm = searchInput.value.trim();
@@ -607,7 +607,7 @@ export function updateUpdatesLabel() {
     workingData = workingData.filter(c => c.server === state.currentServerFilter);
   }
 
-  const updatesCount = workingData.filter(c => c.update_available).length;
+  const updatesCount = workingData.filter(c => c.update_available || c.newer_version_available).length;
   
   if (updatesCount > 0) {
     updatesLabel.innerHTML = `Updates <span style="color: #f59e0b; font-weight: 600;">( ${updatesCount} )</span>`;

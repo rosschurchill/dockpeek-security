@@ -172,15 +172,19 @@ export class TableRenderer {
       // not_scanned / skipped / failed / error / null — leave box empty
     }
 
-    // Update badge — show only when truly available (bypass hidden class specificity issue)
+    // Update badge — show when local digest mismatch OR registry has newer version
     const updateBadgeEl = clone.querySelector('[data-content="update-indicator"]');
     if (updateBadgeEl) {
-      if (container.update_available) {
+      const hasUpdate = container.update_available || container.newer_version_available;
+      if (hasUpdate) {
         updateBadgeEl.style.display = '';
         updateBadgeEl.classList.add('update-available-indicator');
         updateBadgeEl.setAttribute('data-server', container.server || '');
         updateBadgeEl.setAttribute('data-container', container.name || '');
-        updateBadgeEl.setAttribute('data-tooltip', `Click to update ${container.name}`);
+        const tooltip = container.latest_version
+          ? `Update available: ${container.latest_version}`
+          : `Click to update ${container.name}`;
+        updateBadgeEl.setAttribute('data-tooltip', tooltip);
       } else {
         updateBadgeEl.style.display = 'none';
       }

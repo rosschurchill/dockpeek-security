@@ -251,12 +251,26 @@ class UpdateChecker:
                         f"{base_name}:{current_tag}"
                     )
                     return False
-            
-                logger.warning(
+
+                # Pull failed (no registry auth, private repo, etc.)
+                # Fall back to HTTP registry version check which doesn't need Docker pull
+                try:
+                    from .version_checker import version_checker
+                    result = version_checker.check_for_newer_version(f"{base_name}:{current_tag}")
+                    if result and result.is_newer:
+                        logger.info(
+                            f"\033[96m[{server_name}]\033[0m "
+                            f"\033[93mUpdate available (via registry API)\033[0m  "
+                            f"{base_name}:{current_tag} → {result.tag}"
+                        )
+                        return True
+                except Exception:
+                    pass
+
+                logger.debug(
                     f"\033[96m[{server_name}]\033[0m "
-                    f"\033[91mCannot pull\033[0m "
-                    f"{base_name}:{current_tag}"
-                    f"\033[90m– built locally or private repository\033[0m"
+                    f"No update found for {base_name}:{current_tag} "
+                    f"(pull failed, registry API checked)"
                 )
                 return False
 

@@ -332,7 +332,7 @@ def portainer_status():
 
         {
             "configured": true,
-            "url": "https://10.0.0.200:9443",
+            "url": "https://10.0.10.200:9443",
             "connected": true
         }
 
