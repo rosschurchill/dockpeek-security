@@ -61,3 +61,4 @@ PROJECT_SCOPE.md
 # Temp / local dev notes
 *.tmp
 *.bak
+.mcp.json
